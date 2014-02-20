@@ -1,0 +1,48 @@
+{
+    "name": "pragmarx/steroids",
+
+    "description": "A Laravel 4.1+ IP whitelisting and blacklisting",
+
+    "keywords": ["steroids", "whitelist", "blacklist", "laravel"],
+
+    "license": "MIT",
+
+    "authors": [
+        {
+            "name": "Antonio Carlos Ribeiro",
+            "email": "acr@antoniocarlosribeiro.com",
+            "role": "Creator"
+        }
+    ],
+
+    "require": {
+        "php": ">=5.3.7",
+        "illuminate/support": "4.*",
+        "illuminate/cache": "4.*",
+        "illuminate/filesystem": "4.*",
+        "pragmarx/support": "0.*"
+    },
+
+    "require-dev": {
+        "mockery/mockery": "0.8.0"
+    },
+
+    "autoload": {
+        "psr-4": {
+            "PragmaRX\\Steroids\\": "src/"
+        }
+    },
+
+    "extra": {
+            "component": "package",
+            "frameworks": ["Laravel 4"],
+            "versions": {
+                    "0.1.0": "master"
+            },
+            "branch-alias": {
+                    "dev-master": "0.1.0-dev"
+            }
+    },
+
+    "minimum-stability": "dev"
+}
