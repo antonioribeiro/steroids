@@ -1,4 +1,5 @@
-<?php namespace PragmaRX\Steroids;
+<?php 
+
 /**
  * Part of the Steroids package.
  *
@@ -17,6 +18,8 @@
  * @copyright  (c) 2013, PragmaRX
  * @link       http://pragmarx.com
  */
+
+namespace PragmaRX\Steroids;
 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
@@ -37,6 +40,22 @@ class Steroids
 		$this->config = $config;
 
         $this->fileSystem = $fileSystem;
+	}
+
+	public function show()
+	{
+		$listLexer = new \PragmaRX\Steroids\Support\ListLexer('[a,b,c,d,e]');
+
+		$token = $listLexer->nextToken();
+		 
+		while($token->type != 1) {
+		    echo $token . "\n";
+		    $token = $listLexer->nextToken();
+		}		
+
+		dd($listLexer);
+
+		return "show!";
 	}
 
 }
