@@ -34,7 +34,7 @@ class Steroids
 		'extends' 	=> array('hasBody' => false, 'template' => '<whatever>'),
 		'php'		=> array('hasBody' => true, 'template' => '<whatever>'),
 		'input' 	=> array('hasBody' => false, 'template' => '<whatever>'),
-		'section' 	=> array('hasBody' => true, 'template' => '<whatever>'),
+		'box' 	=> array('hasBody' => true, 'template' => '<whatever>'),
 	);
 
 	/**
@@ -51,11 +51,13 @@ class Steroids
 
 	public function show()
 	{
-		$blade = "	@input-default(x=1,x=2)
+		$blade = "@php
 
+        			@input-default(x='Se essa porra não rolar',y=`bosta quadrada!`)
+                    @extends('views.site._layouts.page')
 					@extends('views.site._layouts.page')
 
-					@section('pageContent') qualquer porra @@
+					@box('pageContent') qualquer porra @@
 
 					@input(x=1,x=2)
 
@@ -67,16 +69,23 @@ class Steroids
 						\$widgetIcon = 'fa fa-check';
 					@@
 
-					@section('pageContent')
+					@box('pageContent')
 						<!-- widget grid -->
-						<section id=\"widget-grid\" class=\"\">
-
+						<box id=\"widget-grid\" class=\"\">
+							@input(x=1,x=2)
+							@input(x=1,x=2)
+							@input(x=1,x=2)
+							@input(x=1,x=2)
 							<!-- row -->
 								<div class=\"row\">
-
+									@php
+										\$requiredJavascript\[\] = 'javascript.formLoader';
+										\$widgetTitle = 'Novo usuário';
+										\$widgetIcon = 'fa fa-check';
+									@@
 								</div>
 							<!-- row -->
-						</section>
+						</box>
 					@@
 					";
 

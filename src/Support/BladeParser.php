@@ -20,14 +20,18 @@
  */
 
 namespace PragmaRX\Steroids\Support;
- 
+
+use PragmaRX\Steroids\Exceptions\SyntaxError;
+
+use Exception;
+
 class BladeParser {
 	const T_LINE_COMMAND        = 1;
 	const T_BLOCK_COMMAND       = 2;
-	const T_ENDCOMMAND          = 2;
-	const T_NON_COMMAND         = 3;
+	const T_END_COMMAND         = 3;
+	const T_NON_COMMAND         = 4;
 
-	private $tokens;
+	private $commands;
 
 	private $keywords = array();
 
@@ -45,7 +49,7 @@ class BladeParser {
 	{
 		static $regex;
 
-		$this->tokens = array();
+		$this->commands = array();
 
 		if ( ! isset($regex)) {
 			$regex = '/(' . implode(')|(', $this->getCatchablePatterns()) . ')|'
@@ -57,12 +61,14 @@ class BladeParser {
 
 		foreach ($matches as $match) {
 			// Must remain before 'value' assignment since it can change content
-			$type = $this->getType($match[0]);
+			$type = $this->getCommandAndType($match[0], $command);
 
-			$this->tokens[] = array(
+			$this->commands[] = array(
 				'value' => $match[0],
 				'type'  => $type,
 				'position' => $match[1],
+				'number'  => NULL,
+				'command' => $command
 			);
 		}
 
@@ -81,51 +87,89 @@ class BladeParser {
 		return array('\s+', '(.)');
 	}
 
-	protected function getType($value)
+	protected function getCommandAndType($value, &$commands)
 	{
-		$key = $this->extractKeyword($value);
+		$command = new Command($value);
 
-		d($key);
+		$key = $command->getInstruction();
+		$marker = $command->getMarker();
 
-		// if($value === '@@') {
-		// 	return static::T_ENDCOMMAND;
-		// }
-		// else if($value[0] == '@' && array_key_exists($key, $this->keywords))
-		// {
-		// 	if($this->keywords[$key]['hasBody'])
-		// 	{
-		// 		return static::T_BLOCK_COMMAND;	
-		// 	}
-		// 	else
-		// 	{
-		// 		return static::T_LINE_COMMAND;	
-		// 	}
-		// }
-		// else
-		// {
-		// 	return static::T_NON_COMMAND;
-		// }
+		if($marker === '@@') {
+			return static::T_END_COMMAND;
+		}
+		else if($marker == '@' && array_key_exists($key, $this->keywords))
+		{
+			if($this->keywords[$key]['hasBody'])
+			{
+				return static::T_BLOCK_COMMAND;	
+			}
+			else
+			{
+				return static::T_LINE_COMMAND;	
+			}
+		}
+		else
+		{
+			return static::T_NON_COMMAND;
+		}
 
 		return 1;
 	}
 
 	private function enumerateCommands()
 	{
-		// foreach($this->tokens as $key = $token)
-		// {
+		$number = 0;
+		while($end = $this->getFirstUnumeratedEndCommand())
+		{
+			$start = $this->getPriorUnumeratedBlockCommand($end);
 
-		// }
+			$this->commands[$start]['number'] = $number;
+			$this->commands[$end]['number'] = $number;
+
+			$number++;
+		}
+
+		$this->syntaxCheck();
 	}
 
-	private function extractKeyword($command)
+	private function getFirstUnumeratedEndCommand()
 	{
-		$pattern = '/@(.*)((\(.*\))|)/';
+		foreach($this->commands as $key => $token)
+		{
+			if($token['type'] == static::T_END_COMMAND && ! $token['number'])
+			{
+				return $key;
+			}
+		}
+	}
 
-		preg_match($pattern, $command, $matches, PREG_OFFSET_CAPTURE);
-		
-		dd($matches);
-		if(count($matches) > 1) {
-			return $matches[1];
+	private function getPriorUnumeratedBlockCommand($line)
+	{
+		while($line >= 0)
+		{
+			if($this->commands[$line]['type'] == static::T_BLOCK_COMMAND && ! $this->commands[$line]['number'])
+			{
+				return $line;
+			}
+
+			$line--;
+		}
+
+		throw new SyntaxError("Could not find a code block start.", 1);
+	}
+
+	private function syntaxCheck() 
+	{
+		foreach($this->commands as $key => $command)
+		{
+			/**
+			 * All block commands should be numbered at this point, if they aren't
+			 * code has a syntax error.
+			 */
+			if($command['type'] == static::T_BLOCK_COMMAND && ! $command['number'])
+			{
+				throw new SyntaxError("One or more code blocks are not closed (@@).", 1);
+			}
 		}
 	}
 }
