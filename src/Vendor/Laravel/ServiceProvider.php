@@ -25,6 +25,11 @@ use PragmaRX\Steroids\Steroids;
 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
+use PragmaRX\Steroids\Support\KeywordList;
+use PragmaRX\Steroids\Support\BladeParser;
+use PragmaRX\Steroids\Support\BladeProcessor;
+
+use PragmaRX\Steroids\Vendor\Laravel\Artisan\Templates as TemplatesCommand;
 
 use PragmaRX\Support\ServiceProvider as PragmaRXServiceProvider;
 
@@ -57,9 +62,17 @@ class ServiceProvider extends PragmaRXServiceProvider {
 
         $this->registerFileSystem();
 
+        $this->registerKeywordList();
+
+        $this->registerBladeParser();
+
+        $this->registerBladeProcessor();
+
         $this->registerSteroids();
 
-        // $this->commands('steroids.clear.command');
+        $this->registerTemplatesCommand();
+
+        $this->commands('steroids.templates.command');
     }
 
     /**
@@ -86,6 +99,51 @@ class ServiceProvider extends PragmaRXServiceProvider {
     }
 
     /**
+     * Register the KeywordList driver used by Steroids
+     * 
+     * @return void
+     */
+    private function registerKeywordList()
+    {
+        $this->app['steroids.keywordList'] = $this->app->share(function($app)
+        {
+            return new KeywordList(
+                                    $app['steroids.config'],
+                                    $app['steroids.fileSystem']
+                                );
+        });
+    }
+
+    /**
+     * Register the KeywordList driver used by Steroids
+     * 
+     * @return void
+     */
+    private function registerBladeProcessor()
+    {
+        $this->app['steroids.bladeProcessor'] = $this->app->share(function($app)
+        {
+            return new BladeProcessor(
+                                    $app['steroids.config'],
+                                    $app['steroids.fileSystem']
+                                );
+        });
+    }
+
+    /**
+     * Register the KeywordList driver used by Steroids
+     * 
+     * @return void
+     */
+    private function registerBladeParser()
+    {
+        $this->app['steroids.bladeParser'] = $this->app->share(function($app)
+        {
+            return new BladeParser();
+        });
+    }
+
+    /**
      * Takes all the components of Steroids and glues them
      * together to create Steroids.
      *
@@ -99,8 +157,24 @@ class ServiceProvider extends PragmaRXServiceProvider {
 
             return new Steroids(
                                     $app['steroids.config'],
-                                    $app['steroids.fileSystem']
+                                    $app['steroids.fileSystem'],
+                                    $app['steroids.keywordList'],
+                                    $app['steroids.bladeParser'],
+                                    $app['steroids.bladeProcessor']
                                 );
+        });
+    }
+
+    /**
+     * Register the Whitelist Artisan command
+     *
+     * @return void
+     */ 
+    private function registerTemplatesCommand()
+    {
+        $this->app['steroids.templates.command'] = $this->app->share(function($app)
+        {
+            return new TemplatesCommand;
         });
     }
 

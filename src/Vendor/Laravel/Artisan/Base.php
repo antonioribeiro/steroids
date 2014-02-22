@@ -12,4 +12,23 @@ class Base extends Command {
 		}
 	}
 
+	/**
+	 * Get the console command arguments.
+	 *
+	 * @return array
+	 */
+	protected function getArguments()
+	{
+		return isset($this->arguments) ? $this->arguments : array();
+	}
+
+	/**
+	 * Get the console command options.
+	 *
+	 * @return array
+	 */
+	protected function getOptions()
+	{
+		return isset($this->options) ? $this->options : array();
+	}
 }

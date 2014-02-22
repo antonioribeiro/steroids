@@ -45,11 +45,20 @@ class BladeParser {
 		$this->keywords[] = $keyword;
 	}
 
-	public function scan($input)
+	public function parse($input)
+	{
+		$this->scan($input);
+
+		$this->enumerateCommands();
+	}
+
+	private function scan($input) 
 	{
 		static $regex;
 
 		$this->commands = array();
+
+		$this->commandCount = 0;
 
 		if ( ! isset($regex)) {
 			$regex = '/(' . implode(')|(', $this->getCatchablePatterns()) . ')|'
@@ -61,18 +70,17 @@ class BladeParser {
 
 		foreach ($matches as $match) {
 			// Must remain before 'value' assignment since it can change content
-			$type = $this->getCommandAndType($match[0], $command);
+			$type = $this->getCommandAndType($match[0], $command, $keyword);
 
 			$this->commands[] = array(
 				'value' => $match[0],
 				'type'  => $type,
 				'position' => $match[1],
 				'number'  => NULL,
-				'command' => $command
+				'command' => $command,
+				'keyword' => $keyword,
 			);
 		}
-
-		$this->enumerateCommands();
 	}
 
 	protected function getCatchablePatterns()
@@ -87,7 +95,7 @@ class BladeParser {
 		return array('\s+', '(.)');
 	}
 
-	protected function getCommandAndType($value, &$commands)
+	protected function getCommandAndType($value, &$commands, &$keyword)
 	{
 		$command = new Command($value);
 
@@ -99,7 +107,11 @@ class BladeParser {
 		}
 		else if($marker == '@' && array_key_exists($key, $this->keywords))
 		{
-			if($this->keywords[$key]['hasBody'])
+			$keyword = $this->keywords[$key];
+
+			$this->commandCount++;
+
+			if($keyword['hasBody'])
 			{
 				return static::T_BLOCK_COMMAND;	
 			}
@@ -169,6 +181,24 @@ class BladeParser {
 			if($command['type'] == static::T_BLOCK_COMMAND && ! $command['number'])
 			{
 				throw new SyntaxError("One or more code blocks are not closed (@@).", 1);
+			}
+		}
+	}
+
+	public function hasCommands($view) 
+	{
+		$this->parse($view);
+
+		return $this->commandCount > 0;
+	}
+
+	public function getFirstCommand() 
+	{
+		foreach($this->commands as $key => $command)
+		{
+			if($command['type'] == static::T_BLOCK_COMMAND || $command['type'] == static::T_LINE_COMMAND)
+			{
+				return $command;
 			}
 		}
 	}

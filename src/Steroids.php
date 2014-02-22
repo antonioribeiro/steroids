@@ -23,6 +23,9 @@ namespace PragmaRX\Steroids;
 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
+use PragmaRX\Steroids\Support\KeywordList;
+use PragmaRX\Steroids\Support\BladeParser;
+use PragmaRX\Steroids\Support\BladeProcessor;
 
 class Steroids
 {
@@ -30,34 +33,37 @@ class Steroids
 
 	private $fileSystem;
 
-	private $keywords = array(
-		'extends' 	=> array('hasBody' => false, 'template' => '<whatever>'),
-		'php'		=> array('hasBody' => true, 'template' => '<whatever>'),
-		'input' 	=> array('hasBody' => false, 'template' => '<whatever>'),
-		'box' 	=> array('hasBody' => true, 'template' => '<whatever>'),
-	);
+	private $keywordList;
+
+	private $parser;
 
 	/**
 	 * Initialize Steroids object
 	 * 
 	 * @param Locale $locale
 	 */
-	public function __construct(Config $config, Filesystem $fileSystem)
+	public function __construct(Config $config, 
+								Filesystem $fileSystem, 
+								KeywordList $keywordList, 
+								BladeParser $parser, 
+								BladeProcessor $processor)
 	{
 		$this->config = $config;
 
 		$this->fileSystem = $fileSystem;
+
+		$this->keywordList = $keywordList;
+
+		$this->parser = $parser;
+
+		$this->processor = $processor;
 	}
 
-	public function show()
+	public function show() 
 	{
-		$blade = "@php
-
-        			@input-default(x='Se essa porra não rolar',y=`bosta quadrada!`)
+		$view = "@input-default(x='Se essa porra não rolar',y=`bosta quadrada!`)
                     @extends('views.site._layouts.page')
 					@extends('views.site._layouts.page')
-
-					@box('pageContent') qualquer porra @@
 
 					@input(x=1,x=2)
 
@@ -89,14 +95,20 @@ class Steroids
 					@@
 					";
 
-		// $blade = "select * from x where mlima='foda-se essa merda' and caralho=maria.casaDoCacete;";
+		return $this->processView($view);
+	}
 
-		$this->parser = new \PragmaRX\Steroids\Support\BladeParser; 
-		$this->parser->setKeywords($this->keywords);
-		$this->parser->scan($blade);
-		dd($this->parser);
+	public function processView($view)
+	{
+		$this->parser->setKeywords($this->keywordList->all());
 
-		return "show!";
+		while($this->parser->hasCommands($view))
+		{
+			$view = $this->processor->process($view, $this->parser->getFirstCommand());
+			break;
+		}
+
+		return $view;
 	}
 
 }
