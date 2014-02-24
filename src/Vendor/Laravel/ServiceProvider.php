@@ -22,7 +22,7 @@
 namespace PragmaRX\Steroids\Vendor\Laravel;
 
 use PragmaRX\Steroids\Steroids;
-
+  
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
 use PragmaRX\Steroids\Support\KeywordList;
@@ -174,7 +174,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
     {
         $this->app['steroids.templates.command'] = $this->app->share(function($app)
         {
-            return new TemplatesCommand;
+            return new TemplatesCommand($app['steroids.config']);
         });
     }
 

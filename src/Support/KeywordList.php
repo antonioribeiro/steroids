@@ -18,7 +18,7 @@
  * @copyright  (c) 2013, PragmaRX
  * @link       http://pragmarx.com
  */
-
+ 
 namespace PragmaRX\Steroids\Support;
 
 use PragmaRX\Support\Config;
@@ -27,7 +27,7 @@ use PragmaRX\Support\Filesystem;
 class KeywordList {
 	
 	private $config;
-	
+
 	private $fileSystem;
 
 	private $keywords = array(

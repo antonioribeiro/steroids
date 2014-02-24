@@ -191,7 +191,7 @@ class BladeParser {
 
 		return $this->commandCount > 0;
 	}
-
+ 
 	public function getFirstCommand() 
 	{
 		foreach($this->commands as $key => $command)

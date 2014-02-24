@@ -40,7 +40,7 @@ class Templates extends Base {
 	 *
 	 * @return void
 	 */
-	public function fire()
+	public function fire() 
 	{
 		$assetPath = base_path().'/vendor/pragmarx/steroids/src/templates';
 
@@ -48,7 +48,7 @@ class Templates extends Base {
 
 		$templatePath = Config::get('pragmarx/steroids::template_dir');
 
-		dd($templatePath);
+		dd($temp latePath);
 
 		$this->copyDir($assetPath, $templatePath);
 	}

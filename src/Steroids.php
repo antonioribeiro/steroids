@@ -92,7 +92,7 @@ class Steroids
 								</div>
 							<!-- row -->
 						</box>
-					@@
+		 			@@
 					";
 
 		return $this->processView($view);
