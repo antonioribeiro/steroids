@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Part of the Steroids package.
  *
@@ -18,14 +19,8 @@
  * @link       http://pragmarx.com
  */
 
-return array(
+namespace PragmaRX\Steroids\Exceptions;
 
-    'create_steroids_alias' => true,
-
-    'steroids_alias' => 'Steroids',
-
-    'templates_dir' => app_path().'/config/packages/pragmarx/steroids/templates',
-
-    'default_template_dir' => '/default',
-
-);
+use Exception;
+ 
+class TemplatesDirectoryNotAvailable extends Exception {}

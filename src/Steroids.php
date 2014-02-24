@@ -92,7 +92,7 @@ class Steroids
 								</div>
 							<!-- row -->
 						</box>
-		 			@@
+					@@
 					";
 
 		return $this->processView($view);
@@ -109,6 +109,11 @@ class Steroids
 		}
 
 		return $view;
+	}
+
+	public function getConfig($key)
+	{
+		return $this->config->get($key);
 	}
 
 }

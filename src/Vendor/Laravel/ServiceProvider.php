@@ -22,7 +22,7 @@
 namespace PragmaRX\Steroids\Vendor\Laravel;
 
 use PragmaRX\Steroids\Steroids;
-  
+ 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
 use PragmaRX\Steroids\Support\KeywordList;

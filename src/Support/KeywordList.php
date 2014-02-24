@@ -23,6 +23,7 @@ namespace PragmaRX\Steroids\Support;
 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
+use PragmaRX\Exceptions\TemplatesDirectoryNotAvailable;
 
 class KeywordList {
 	
@@ -30,12 +31,7 @@ class KeywordList {
 
 	private $fileSystem;
 
-	private $keywords = array(
-		'extends' 	=> array('hasBody' => false, 'template' => '<whatever>'),
-		'php'		=> array('hasBody' => true, 'template' => '<whatever>'),
-		'input' 	=> array('hasBody' => false, 'template' => '<whatever>'),
-		'box' 	=> array('hasBody' => true, 'template' => '<whatever>'),
-	);
+	private $keywords = array();
 
 	/**
 	 * Initialize Steroids object
@@ -53,12 +49,81 @@ class KeywordList {
 
 	private function load() 
 	{
-
+		foreach($this->getFiles($this->getTemplatesDir()) as $file)
+		{
+			$this->addKeyword($file);
+		}
 	}
 
-	public function all() 
+	public function all()
 	{
 		return $this->keywords;
 	}
 
+	private function getFiles($dir) 
+	{
+		if ( ! $this->fileSystem->isDirectory($dir))
+		{
+			throw new TemplatesDirectoryNotAvailable("Error Processing Request", 1);
+		}
+
+		return $this->fileSystem->allFiles($dir);
+	}
+
+	private function addKeyword($file) 
+	{
+		$keyword = $this->makeKeyword($file);
+
+		if ($keyword)
+		{
+			$tree = explodeTree(array($file->getRelativePath() => $keyword), slash());
+
+			$this->keywords[] = $tree;
+		}
+	}
+
+	private function getTemplatesDir() 
+	{
+		return $this->config->get('templates_dir');
+	}
+
+	private function getDefaultTemplateDir() 
+	{
+		return $this->getTemplatesDir() . $this->config->get('default_template_dir');
+	}	
+
+	private function makeFileName($file) 
+	{
+		if ( ! is_string($file))
+		{
+			$file = $file->getRelativePathname();
+		}
+
+		return $this->getTemplatesDir().slash().$file;
+	}
+
+	private function makeKeyword($file) 
+	{
+		if ( ! $keyword = $file->getBasename('.blade.php'))
+		{
+			return;
+		}
+
+		$fileContents = $this->fileSystem->get($this->makeFileName($file));
+
+		$hasBody = $this->hasBody($fileContents);
+
+		return array(
+			$keyword => array(
+							'keyword' => $keyword, 
+							'hasBody' => $hasBody, 
+							'template' => $fileContents
+						)
+		);
+	}
+
+	private function hasBody($contents) 
+	{
+		return strpos($contents, '$__BODY') !== false;
+	}
 }
