@@ -30,29 +30,15 @@ class BladeProcessor {
 
 	private $config;
 	
-	private $fileSystem;
-
-	private $keywords = array(
-		'extends' 	=> array('hasBody' => false, 'template' => '<whatever>'),
-		'php'		=> array('hasBody' => true, 'template' => '<whatever>'),
-		'input' 	=> array('hasBody' => false, 'template' => '<whatever>'),
-		'box' 	=> array('hasBody' => true, 'template' => '<whatever>'),
-	);
-
-	/**
-	 * Initialize Steroids object
-	 * 
-	 * @param Locale $locale
-	 */
-	public function __construct(Config $config, Filesystem $fileSystem)
+	public function __construct(Config $config)
 	{
 		$this->config = $config;
-
-		$this->fileSystem = $fileSystem;
 	}
 
-	public function process($view, $commands)
+	public function process($view, $command)
 	{
+		dd($command);
+
 		return $view;
 	}
 

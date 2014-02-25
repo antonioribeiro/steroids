@@ -70,15 +70,14 @@ class BladeParser {
 
 		foreach ($matches as $match) {
 			// Must remain before 'value' assignment since it can change content
-			$type = $this->getCommandAndType($match[0], $command, $keyword);
+			$type = $this->getCommandAndType($match[0], $command);
 
 			$this->commands[] = array(
 				'value' => $match[0],
 				'type'  => $type,
 				'position' => $match[1],
 				'number'  => NULL,
-				'command' => $command,
-				'keyword' => $keyword,
+				'command' => $command
 			);
 		}
 	}
@@ -95,19 +94,22 @@ class BladeParser {
 		return array('\s+', '(.)');
 	}
 
-	protected function getCommandAndType($value, &$commands, &$keyword)
+	protected function getCommandAndType($value, &$command)
 	{
 		$command = new Command($value);
 
 		$key = $command->getInstruction();
+
 		$marker = $command->getMarker();
 
 		if($marker === '@@') {
 			return static::T_END_COMMAND;
 		}
-		else if($marker == '@' && array_key_exists($key, $this->keywords))
+		else if($marker == '@' && array_get($this->keywords, $key))
 		{
-			$keyword = $this->keywords[$key];
+			$keyword = array_get($this->keywords, $key);
+
+			$command->setInstruction($keyword);
 
 			$this->commandCount++;
 
@@ -146,9 +148,9 @@ class BladeParser {
 
 	private function getFirstUnumeratedEndCommand()
 	{
-		foreach($this->commands as $key => $token)
+		foreach($this->commands as $key => $command)
 		{
-			if($token['type'] == static::T_END_COMMAND && ! $token['number'])
+			if($command['type'] == static::T_END_COMMAND && ! $command['number'])
 			{
 				return $key;
 			}
@@ -202,4 +204,5 @@ class BladeParser {
 			}
 		}
 	}
+
 }

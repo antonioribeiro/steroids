@@ -61,39 +61,35 @@ class Steroids
 
 	public function show() 
 	{
-		$view = "@input-default(x='Se essa porra não rolar',y=`bosta quadrada!`)
-                    @extends('views.site._layouts.page')
-					@extends('views.site._layouts.page')
-
-					@input(x=1,x=2)
-
-					@input-default(x=1,x=2)
-
-					@php
-						\$requiredJavascript\[\] = 'javascript.formLoader';
-						\$widgetTitle = 'Novo usuário';
-						\$widgetIcon = 'fa fa-check';
-					@@
-
-					@box('pageContent')
-						<!-- widget grid -->
-						<box id=\"widget-grid\" class=\"\">
-							@input(x=1,x=2)
-							@input(x=1,x=2)
-							@input(x=1,x=2)
-							@input(x=1,x=2)
-							<!-- row -->
-								<div class=\"row\">
-									@php
-										\$requiredJavascript\[\] = 'javascript.formLoader';
-										\$widgetTitle = 'Novo usuário';
-										\$widgetIcon = 'fa fa-check';
-									@@
-								</div>
-							<!-- row -->
-						</box>
-					@@
-					";
+		$view = "@input-default(disabled;class=hidden,fucked='no',x='Se essa porra não rolar',y=`bosta quadrada!`)
+                 @extends('views.site._layouts.page')
+				 @extends('views.site._layouts.page')
+				 @input(x=1,x=2)
+				 @input(x=1,x=2)
+				 @php
+				 	\$requiredJavascript\[\] = 'javascript.formLoader';
+				 	\$widgetTitle = 'Novo usuário';
+				 	\$widgetIcon = 'fa fa-check';
+				 @@
+				 @box('pageContent')
+				 	<!-- widget grid -->
+				 	<box id=\"widget-grid\" class=\"\">
+				 		@input(x=1,x=2)
+				 		@input(x=1,x=2)
+				 		@input(x=1,x=2)
+				 		@input(x=1,x=2)
+				 		<!-- row -->
+				 			<div class=\"row\">
+				 				@php
+				 					\$requiredJavascript\[\] = 'javascript.formLoader';
+				 					\$widgetTitle = 'Novo usuário';
+				 					\$widgetIcon = 'fa fa-check';
+				 				@@
+				 			</div>
+				 		<!-- row -->
+				 	</box>
+				 @@
+		";
 
 		return $this->processView($view);
 	}
@@ -105,6 +101,7 @@ class Steroids
 		while($this->parser->hasCommands($view))
 		{
 			$view = $this->processor->process($view, $this->parser->getFirstCommand());
+
 			break;
 		}
 

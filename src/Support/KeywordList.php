@@ -74,12 +74,16 @@ class KeywordList {
 	{
 		$keyword = $this->makeKeyword($file);
 
-		if ($keyword)
+		if ($keyword && ! $this->isInDefaultDir($file))
 		{
-			$tree = explodeTree(array($file->getRelativePath() => $keyword), slash());
-
-			$this->keywords[] = $tree;
+			$tree = explodeTree(array('path-'.$file->getRelativePath() => $keyword), slash());
 		}
+		else
+		{
+			$tree = $keyword;
+		}
+
+		$this->keywords = array_merge_recursive($this->keywords, $tree);
 	}
 
 	private function getTemplatesDir() 
@@ -125,5 +129,10 @@ class KeywordList {
 	private function hasBody($contents) 
 	{
 		return strpos($contents, '$__BODY') !== false;
+	}
+
+	private function isInDefaultDir($file) 
+	{
+		return $this->makeFileName($file) === $this->getDefaultTemplateDir().slash().$file->getBasename();
 	}
 }

@@ -123,10 +123,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
     {
         $this->app['steroids.bladeProcessor'] = $this->app->share(function($app)
         {
-            return new BladeProcessor(
-                                    $app['steroids.config'],
-                                    $app['steroids.fileSystem']
-                                );
+            return new BladeProcessor($app['steroids.config']);
         });
     }
 

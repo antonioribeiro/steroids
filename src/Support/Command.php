@@ -51,7 +51,7 @@ class Command {
 			$this->marker = $matches[1][0];
 			$this->instruction = $matches[2][0];
 			$this->template = $matches[3][0];
-			$this->parameters = $matches[4][0];
+			$this->parameters = $this->parseParameters($matches[4][0]);
 			$this->body = $matches[5][0];
 		}
 	}
@@ -85,4 +85,101 @@ class Command {
 	{
 		return $this->body;
 	}	
+
+	public function setInstruction($instruction) 
+	{
+		$this->instruction = $instruction;
+	}
+
+	private function parseParameters($string) 
+	{
+		// Separating parameters
+		$pattern = "/(?:\'[^\']*\'|\"[^\"]*\"|)\K(,|;|$)/";
+
+		preg_match_all($pattern, $string, $matches, PREG_OFFSET_CAPTURE);
+
+		// d($string);
+		// dd($matches);
+
+		$parameters = array();
+
+		foreach(range(0,count($matches[1])-1) as $i)
+		{
+			if ($matches[1][$i][0] !== "")
+			{
+				if ( ! count($parameters))
+				{
+					$parameters[] = substr($string, 0, $matches[1][$i][1]-1);	
+				}
+
+				$parameters[] = substr($string, $matches[1][$i][1]+1, $matches[1][$i+1][1]-$matches[1][$i][1]-1);
+			}
+		}
+
+		d($string);
+		d($matches);
+		dd($parameters);
+
+		foreach(explode(',', $string) as $parameter)
+		{
+			$parts = explode('=',$parameter);
+
+			if (count($parts) == 1)
+			{
+				${$defaultAttribute} = $parts[0];
+			}
+			else
+			if (count($parts) > 1)
+			{
+				$attrName = $parts[0];
+				$attrValue = $parts[1];
+
+				if (isset($attrValue[0]))
+				{
+					$attrValue = $attrValue[0] == "$" ? '<?='.$attrValue.'?>' : $attrValue;
+				}
+				else
+				{
+					$attrValue = '';	
+				}
+			
+				$name = $attrName == 'name' ? $attrValue : $name;
+
+				switch ($attrName) {
+					case 'value':
+						$value = $attrValue;
+						break;
+
+					case 'label':
+						$label = $attrValue;
+						break;
+
+					case 'color':
+						$classes[] = "btn-$attrValue";
+						break;
+
+					case 'md':
+						$classes[] = "col-md-$attrValue";
+						break;
+
+					case 'xs':
+						$classes[] = "col-xs-$attrValue";
+						break;
+
+					case 'sm':
+						$classes[] = "col-sm-$attrValue";
+						break;
+
+					case 'class':
+						$classes[] = "$attrValue";
+						break;
+
+					default:
+						$attributes[] = "$attrName=\"$attrValue\"";
+						break;
+				}
+			}
+
+		}	
+	}
 }
