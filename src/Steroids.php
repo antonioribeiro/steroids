@@ -61,7 +61,7 @@ class Steroids
 
 	public function show() 
 	{
-		$view = "@input-default(disabled;class=hidden,fucked='no',x='Se essa porra não rolar',y=`bosta quadrada!`)
+		$view = "@bootstrap.v2.input(\$vector=array(fodase,1=>x,fodase2,name=>hidden,size=>10),\$fucked=\"no this is not; 'what' I \"think\" it is!\";class=hidden,disabled;#literal=suckme)
                  @extends('views.site._layouts.page')
 				 @extends('views.site._layouts.page')
 				 @input(x=1,x=2)

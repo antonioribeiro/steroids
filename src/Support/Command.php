@@ -23,6 +23,10 @@ namespace PragmaRX\Steroids\Support;
  
 class Command {
 
+	const T_ATTRIBUTE_PARAMETER  = 0; // class=hidden
+	const T_VARIABLE_PARAMETER   = 1; // $var=hidden
+	const T_CONSTANT_PARAMETER   = 2; // #const=1
+
 	private $marker;
 
 	private $line;
@@ -42,7 +46,7 @@ class Command {
 
 	private function parse($command)
 	{
-		$pattern = '/(@{1,2})(\w+)?([-|\+|#]?\w+)?\(?([^\)]+)?\)?(.*)?/';
+		$pattern = '/(@{1,2})(\w+)?([.]?\w+)?\(?(\w*[^(].*[^)]+)?\)?(.*)?/';
 
 		preg_match($pattern, $command, $matches, PREG_OFFSET_CAPTURE);
 
@@ -91,95 +95,191 @@ class Command {
 		$this->instruction = $instruction;
 	}
 
-	private function parseParameters($string) 
+	private function splitParameters($string) 
 	{
-		// Separating parameters
-		$pattern = "/(?:\'[^\']*\'|\"[^\"]*\"|)\K(,|;|$)/";
+		$pattern = "/(?:\'[^\']*[^\"]\'|\"[^\"]*[^\']*\"|\[.*\]|\(.*\)|)\K(,|;|$)/";
 
 		preg_match_all($pattern, $string, $matches, PREG_OFFSET_CAPTURE);
 
-		// d($string);
-		// dd($matches);
-
 		$parameters = array();
+		$start = 0;
 
 		foreach(range(0,count($matches[1])-1) as $i)
 		{
-			if ($matches[1][$i][0] !== "")
-			{
-				if ( ! count($parameters))
-				{
-					$parameters[] = substr($string, 0, $matches[1][$i][1]-1);	
-				}
+			$parameters[] = substr($string, $start, $matches[1][$i][1]-$start);
 
-				$parameters[] = substr($string, $matches[1][$i][1]+1, $matches[1][$i+1][1]-$matches[1][$i][1]-1);
-			}
+			$start = $matches[1][$i][1]+1;
 		}
 
-		d($string);
-		d($matches);
-		dd($parameters);
+		return $parameters;
+	}
 
-		foreach(explode(',', $string) as $parameter)
+	private function parseParameters($string) 
+	{
+		$parameters = $this->splitParameters($string);
+
+		foreach ($parameters as $key => $value) {
+			$parameters[$key] = $this->parseParameter($value);
+		}	
+
+		return $parameters;		
+	}
+
+	private function parseParameter($string) 
+	{
+		$pattern = '/([$#]?\w+)?(=\>|=)?(.*)?/';
+		preg_match($pattern, $string, $matches);
+
+		$parameter = array();
+
+		if ($matches[2] !== "=")
 		{
-			$parts = explode('=',$parameter);
+			$parameter['type'] = self::T_ATTRIBUTE_PARAMETER;
+			$parameter['variable'] = $this->parseValue($matches[1]);
+		}
+		else
+		{
+			$start = 1;
 
-			if (count($parts) == 1)
+			switch ($matches[1][0]) {
+				case '$':
+					$parameter['type'] = self::T_VARIABLE_PARAMETER;
+					break;
+
+				case '#':
+					$parameter['type'] = self::T_CONSTANT_PARAMETER;
+					break;
+				
+				default:
+					$parameter['type'] = self::T_ATTRIBUTE_PARAMETER;
+					$start = 0;
+					break;
+			}
+
+			$parameter['variable'] = substr($matches[1], $start);
+			$parameter['value'] = $this->parseValue($matches[3]);
+		}
+
+		return $parameter;
+
+		//// ----------- keep this for future use
+
+
+
+		if (count($parts) == 1)
+		{
+			${$defaultAttribute} = $parts[0];
+		}
+		else
+		if (count($parts) > 1)
+		{
+			$attrName = $parts[0];
+			$attrValue = $parts[1];
+
+			if (isset($attrValue[0]))
 			{
-				${$defaultAttribute} = $parts[0];
+				$attrValue = $attrValue[0] == "$" ? '< ?='.$attrValue.'? >' : $attrValue;
 			}
 			else
-			if (count($parts) > 1)
 			{
-				$attrName = $parts[0];
-				$attrValue = $parts[1];
-
-				if (isset($attrValue[0]))
-				{
-					$attrValue = $attrValue[0] == "$" ? '<?='.$attrValue.'?>' : $attrValue;
-				}
-				else
-				{
-					$attrValue = '';	
-				}
-			
-				$name = $attrName == 'name' ? $attrValue : $name;
-
-				switch ($attrName) {
-					case 'value':
-						$value = $attrValue;
-						break;
-
-					case 'label':
-						$label = $attrValue;
-						break;
-
-					case 'color':
-						$classes[] = "btn-$attrValue";
-						break;
-
-					case 'md':
-						$classes[] = "col-md-$attrValue";
-						break;
-
-					case 'xs':
-						$classes[] = "col-xs-$attrValue";
-						break;
-
-					case 'sm':
-						$classes[] = "col-sm-$attrValue";
-						break;
-
-					case 'class':
-						$classes[] = "$attrValue";
-						break;
-
-					default:
-						$attributes[] = "$attrName=\"$attrValue\"";
-						break;
-				}
+				$attrValue = '';	
 			}
+		
+			$name = $attrName == 'name' ? $attrValue : $name;
 
-		}	
+			switch ($attrName) {
+				case 'value':
+					$value = $attrValue;
+					break;
+
+				case 'label':
+					$label = $attrValue;
+					break;
+
+				case 'color':
+					$classes[] = "btn-$attrValue";
+					break;
+
+				case 'md':
+					$classes[] = "col-md-$attrValue";
+					break;
+
+				case 'xs':
+					$classes[] = "col-xs-$attrValue";
+					break;
+
+				case 'sm':
+					$classes[] = "col-sm-$attrValue";
+					break;
+
+				case 'class':
+					$classes[] = "$attrValue";
+					break;
+
+				default:
+					$attributes[] = "$attrName=\"$attrValue\"";
+					break;
+			}
+		}
+	}
+
+	private function parseValue($value) 
+	{
+		if (is_array($value = $this->parseArray($value)))
+		{
+			return $value;
+		}
+
+		return $value;
+	}
+
+	private function parseArray($value) 
+	{
+		$pattern = '/^(?:array\(|\[)(.*)(?:\)|\])$/';
+		preg_match($pattern, $value, $matches);
+
+		if ($matches)
+		{
+			return $this->parseArrayItems($matches[1]);
+		}
+
+		return $value;
+	}
+
+	private function parseArrayItems($arrayItems) 
+	{
+		$items = array();
+		$number = 0;
+
+		foreach($matches = $this->splitParameters($arrayItems) as $item)
+		{
+			list($key,$value) = $this->parseArrayItem($item);
+
+			$items[$key ?: $this->nextArrayKey($items, $number)] = $value;
+		}
+
+		return $items;
+	}
+
+	private function parseArrayItem($item) 
+	{
+		$pattern = '/([$#]?\w+)?(=\>|=)?(.*)?/';
+
+		preg_match($pattern, $item, $matches);
+
+		$key   = $matches[2] == "=>" ? $matches[1] : null;
+		$value = $matches[2] == "=>" ? $matches[3] : $matches[1];
+
+		return array($key, $this->parseArray($value));
+	}
+
+	private function nextArrayKey($array, &$number)
+	{
+		while(isset($array[$number]))
+		{
+			$number++;
+		}
+
+		return $number;
 	}
 }

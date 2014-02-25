@@ -68,14 +68,15 @@ class BladeParser {
 		$flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE;
 		$matches = preg_split($regex, $input, -1, $flags);
 
-		foreach ($matches as $match) {
+		foreach ($matches as $key => $match) {
 			// Must remain before 'value' assignment since it can change content
 			$type = $this->getCommandAndType($match[0], $command);
 
 			$this->commands[] = array(
 				'value' => $match[0],
 				'type'  => $type,
-				'position' => $match[1],
+				'start' => $match[1],
+				'end' => isset($matches[$key+1][1]) ? $matches[$key+1][1] : strlen($input),
 				'number'  => NULL,
 				'command' => $command
 			);
