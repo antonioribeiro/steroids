@@ -37,8 +37,14 @@ class BladeProcessor {
 
 	public function process($view, $command)
 	{
-		dd($command);
+		d($view);
+		d($command);
 
+		$command->processVariables($view);
+
+		$view = substr_replace($view, '$youGotIt', $command->getStart(), strlen($command->getString()));
+
+		dd($view);
 		return $view;
 	}
 

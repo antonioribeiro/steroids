@@ -72,14 +72,13 @@ class BladeParser {
 			// Must remain before 'value' assignment since it can change content
 			$type = $this->getCommandAndType($match[0], $command);
 
-			$this->commands[] = array(
-				'value' => $match[0],
-				'type'  => $type,
-				'start' => $match[1],
-				'end' => isset($matches[$key+1][1]) ? $matches[$key+1][1] : strlen($input),
-				'number'  => NULL,
-				'command' => $command
-			);
+			$command->setString($match[0]);
+			$command->setType($type);
+			$command->setStart($match[1]);
+			$command->setEnd(isset($matches[$key+1][1]) ? $matches[$key+1][1] : strlen($input));
+			$command->setNumber(NULL);
+
+			$this->commands[] = $command;
 		}
 	}
 
@@ -99,22 +98,20 @@ class BladeParser {
 	{
 		$command = new Command($value);
 
-		$key = $command->getInstruction();
+		$key = $command->getFullInstruction();
 
 		$marker = $command->getMarker();
 
-		if($marker === '@@') {
+		if ($marker === '@@') {
 			return static::T_END_COMMAND;
 		}
-		else if($marker == '@' && array_get($this->keywords, $key))
+		else if ($marker == '@' && $keyword = array_get($this->keywords, $key))
 		{
-			$keyword = array_get($this->keywords, $key);
-
 			$command->setInstruction($keyword);
 
 			$this->commandCount++;
 
-			if($keyword['hasBody'])
+			if ($keyword['hasBody'])
 			{
 				return static::T_BLOCK_COMMAND;	
 			}
@@ -138,8 +135,8 @@ class BladeParser {
 		{
 			$start = $this->getPriorUnumeratedBlockCommand($end);
 
-			$this->commands[$start]['number'] = $number;
-			$this->commands[$end]['number'] = $number;
+			$this->commands[$start]->setNumber($number);
+			$this->commands[$end]->setNumber($number);
 
 			$number++;
 		}
@@ -151,7 +148,7 @@ class BladeParser {
 	{
 		foreach($this->commands as $key => $command)
 		{
-			if($command['type'] == static::T_END_COMMAND && ! $command['number'])
+			if ($command->getType() == static::T_END_COMMAND && is_null($command->getNumber()))
 			{
 				return $key;
 			}
@@ -162,7 +159,7 @@ class BladeParser {
 	{
 		while($line >= 0)
 		{
-			if($this->commands[$line]['type'] == static::T_BLOCK_COMMAND && ! $this->commands[$line]['number'])
+			if ($this->commands[$line]->getType() == static::T_BLOCK_COMMAND && is_null($this->commands[$line]->getNumber()))
 			{
 				return $line;
 			}
@@ -181,7 +178,7 @@ class BladeParser {
 			 * All block commands should be numbered at this point, if they aren't
 			 * code has a syntax error.
 			 */
-			if($command['type'] == static::T_BLOCK_COMMAND && ! $command['number'])
+			if ($command->getType() == static::T_BLOCK_COMMAND && is_null($command->getNumber()))
 			{
 				throw new SyntaxError("One or more code blocks are not closed (@@).", 1);
 			}
@@ -199,7 +196,7 @@ class BladeParser {
 	{
 		foreach($this->commands as $key => $command)
 		{
-			if($command['type'] == static::T_BLOCK_COMMAND || $command['type'] == static::T_LINE_COMMAND)
+			if ($command->getType() == static::T_BLOCK_COMMAND || $command->getType() == static::T_LINE_COMMAND)
 			{
 				return $command;
 			}

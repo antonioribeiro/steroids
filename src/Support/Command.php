@@ -23,9 +23,10 @@ namespace PragmaRX\Steroids\Support;
  
 class Command {
 
-	const T_ATTRIBUTE_PARAMETER  = 0; // class=hidden
-	const T_VARIABLE_PARAMETER   = 1; // $var=hidden
-	const T_CONSTANT_PARAMETER   = 2; // #const=1
+	const T_SINGLE_STRING	= 0; // "class=hidden"
+	const T_GLOBAL_VARIABLE = 1; // $var=hidden
+	const T_LOCAL_VARIABLE  = 2; // #const=1
+	const T_HTML_ATTRIBUTE  = 3; // const=1
 
 	private $marker;
 
@@ -39,6 +40,20 @@ class Command {
 
 	private $body;
 
+	private $string;
+
+	private $type;
+
+	private $start;
+
+	private $end;
+
+	private $number;
+
+	private $attributes;
+
+	private $locals;
+
 	public function __construct($command) 
 	{
 		$this->parse($command);
@@ -46,18 +61,21 @@ class Command {
 
 	private function parse($command)
 	{
-		$pattern = '/(@{1,2})(\w+)?([.]?\w+)?\(?(\w*[^(].*[^)]+)?\)?(.*)?/';
+		preg_match('/(@{1,2})([\w\.]*)\(?(\w*[^(].*[^)]+)?\)?(.*)?/', $command, $matches, PREG_OFFSET_CAPTURE);
 
-		preg_match($pattern, $command, $matches, PREG_OFFSET_CAPTURE);
+		if (count($matches) > 1) 
+		{
+			list($instruction, $template) = $this->parseInstruction($matches[2][0]);
 
-		if(count($matches) > 1) {
 			$this->line = $matches[0][0];
 			$this->marker = $matches[1][0];
-			$this->instruction = $matches[2][0];
-			$this->template = $matches[3][0];
-			$this->parameters = $this->parseParameters($matches[4][0]);
-			$this->body = $matches[5][0];
+			$this->instruction = $instruction;
+			$this->template = $template;
+			$this->parameters = $this->parseParameters($matches[3][0]);
+			$this->body = $matches[4][0];
 		}
+
+		$this->boot();
 	}
 
 	public function getLine() 
@@ -73,6 +91,11 @@ class Command {
 	public function getInstruction() 
 	{
 		return $this->instruction;
+	}
+
+	public function getFullInstruction() 
+	{
+		return $this->getTemplate() . '.' . $this->instruction;
 	}
 
 	public function getTemplate() 
@@ -97,9 +120,7 @@ class Command {
 
 	private function splitParameters($string) 
 	{
-		$pattern = "/(?:\'[^\']*[^\"]\'|\"[^\"]*[^\']*\"|\[.*\]|\(.*\)|)\K(,|;|$)/";
-
-		preg_match_all($pattern, $string, $matches, PREG_OFFSET_CAPTURE);
+		preg_match_all("/(?:\'[^\']*[^\"]\'|\"[^\"]*[^\']*\"|\[.*\]|\(.*\)|)\K(,|;|$)/", $string, $matches, PREG_OFFSET_CAPTURE);
 
 		$parameters = array();
 		$start = 0;
@@ -127,14 +148,25 @@ class Command {
 
 	private function parseParameter($string) 
 	{
-		$pattern = '/([$#]?\w+)?(=\>|=)?(.*)?/';
-		preg_match($pattern, $string, $matches);
+		// Check if the parameter is just a ("single string").
+		// 
+		if(preg_match('/^(?:\s*)([\'\"].*[\'\"])(?:\s*)$/', $string, $matches))
+		{
+			$parameter['type'] = self::T_SINGLE_STRING;
+			$parameter['variable'] = null;
+			$parameter['value'] = $this->parseValue($matches[1]);
+
+			return $parameter;			
+		}
+
+		// Check for any other type of parameter
+		preg_match('/(?:\s*)([$#\"\']?\w+)?(=\>|=)?(.*)?/', $string, $matches);
 
 		$parameter = array();
 
 		if ($matches[2] !== "=")
 		{
-			$parameter['type'] = self::T_ATTRIBUTE_PARAMETER;
+			$parameter['type'] = self::T_HTML_ATTRIBUTE;
 			$parameter['variable'] = $this->parseValue($matches[1]);
 		}
 		else
@@ -143,15 +175,15 @@ class Command {
 
 			switch ($matches[1][0]) {
 				case '$':
-					$parameter['type'] = self::T_VARIABLE_PARAMETER;
+					$parameter['type'] = self::T_GLOBAL_VARIABLE;
 					break;
 
 				case '#':
-					$parameter['type'] = self::T_CONSTANT_PARAMETER;
+					$parameter['type'] = self::T_LOCAL_VARIABLE;
 					break;
 				
 				default:
-					$parameter['type'] = self::T_ATTRIBUTE_PARAMETER;
+					$parameter['type'] = self::T_HTML_ATTRIBUTE;
 					$start = 0;
 					break;
 			}
@@ -235,8 +267,7 @@ class Command {
 
 	private function parseArray($value) 
 	{
-		$pattern = '/^(?:array\(|\[)(.*)(?:\)|\])$/';
-		preg_match($pattern, $value, $matches);
+		preg_match('/^(?:array\(|\[)(.*)(?:\)|\])$/', $value, $matches);
 
 		if ($matches)
 		{
@@ -263,9 +294,7 @@ class Command {
 
 	private function parseArrayItem($item) 
 	{
-		$pattern = '/([$#]?\w+)?(=\>|=)?(.*)?/';
-
-		preg_match($pattern, $item, $matches);
+		preg_match('/([$#]?\w+)?(=\>|=)?(.*)?/', $item, $matches);
 
 		$key   = $matches[2] == "=>" ? $matches[1] : null;
 		$value = $matches[2] == "=>" ? $matches[3] : $matches[1];
@@ -282,4 +311,137 @@ class Command {
 
 		return $number;
 	}
+
+	private function parseInstruction($string) 
+	{
+		$parts = explode('.', $string);
+
+		$instruction = array_pop($parts);
+
+		$template = count($parts) ? implode('.', $parts) : 'default';
+
+		return array($instruction, $template);
+	}
+
+	public function getString()
+	{
+		return $this->string;
+	}
+
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	public function getStart()
+	{
+		return $this->start;
+	}
+
+	public function getEnd()
+	{
+		return $this->end;
+	}
+
+	public function getNumber()
+	{
+		return $this->number;
+	}
+
+	public function setString($string)
+	{
+		$this->string = $string;
+	}
+
+	public function setType($type)
+	{
+		$this->type = $type;
+	}
+
+	public function setStart($start)
+	{
+		$this->start = $start;
+	}
+
+	public function setEnd($end)
+	{
+		$this->end = $end;
+	}
+
+	public function setNumber($number)
+	{
+		$this->number = $number;
+	}
+
+	public function getAttributes() 
+	{
+		return $this->attributes;
+	}
+
+	private function clearMemory() 
+	{
+		$this->body = null;
+		$this->attributes = array();
+		$this->local = array();
+	}
+
+	public function boot()
+	{
+		$this->clearMemory();
+
+		if($this->getLine())
+		{
+			foreach($this->getParameters() as $parameter)
+			{
+				if ($parameter['type'] == static::T_HTML_ATTRIBUTE)
+				{
+					if (isset($parameter['value']))
+					{
+						$this->addAtribute($parameter['variable'], $parameter['value']);		
+					}
+				}
+				else
+				if ($parameter['type'] == static::T_LOCAL_VARIABLE)
+				{
+					$this->addLocal($parameter['variable'], $parameter['value']);
+				}
+			}
+		}
+	}
+
+	private function addAtribute($variable, $value) 
+	{
+		$this->attributes[$variable][$value] = $value;
+	}
+
+	private function addLocal($variable, $value) 
+	{
+		$this->local[$variable] = $value;
+	}
+
+	public function processVariables($view)
+	{
+		$view = str_replace('@_BODY_@', $this->body, $view);
+
+		$view = str_replace('@_ATTRIBUTES_@', $this->getAttributesString(), $view);
+
+		foreach ($this->local as $key => $value) 
+		{
+			str_replace('@_'.$key.'_@', $value, $view);
+		}
+	}
+
+	private function getAttributesString($clean = false) 
+	{
+		foreach($this->getAttributes() as $key => $values)
+		{
+			$attributes = 
+			$attributes[] = $key.'="'..'"';
+		}
+
+		dd($attributes);
+
+		// return 
+	}
+
 }

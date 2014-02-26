@@ -76,11 +76,11 @@ class KeywordList {
 
 		if ($keyword && ! $this->isInDefaultDir($file))
 		{
-			$tree = explodeTree(array('path-'.$file->getRelativePath() => $keyword), slash());
+			$tree = explodeTree(array($file->getRelativePath() => $keyword), slash());
 		}
 		else
 		{
-			$tree = $keyword;
+			$tree = array('default' => $keyword);
 		}
 
 		$this->keywords = array_merge_recursive($this->keywords, $tree);
