@@ -435,7 +435,7 @@ class Command {
 	{
 		foreach($this->getAttributes() as $key => $values)
 		{
-			$attributes = 
+			$attributes = @
 			$attributes[] = $key.'="'..'"';
 		}
 
