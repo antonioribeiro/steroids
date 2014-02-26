@@ -61,8 +61,8 @@ class Steroids
 
 	public function show() 
 	{
-		$view = "@bootstrap.v2.input(#icon=home, placeholder=Your Name, class=bt-blue, class=fa fa-home, class=fa fa-home)
-				 @bootstrap.v2.input(\$vector=array(fodase,1=>x,fodase2,name=>hidden,size=>10),\$fucked=\"no this is not; 'what' I \"think\" it is!\";class=hidden,disabled;#literal=suckme)
+		$view = "@bootstrap.v2.input(\$vector=array(fodase,1=>x,fodase2,name=>hidden,size=>10),\$fucked=\"no this is not; 'what' I \"think\" it is!\";class=hidden,disabled;#literal=suckme)
+				 @bootstrap.v2.input(#icon=home, placeholder=Your Name, class=bt-blue, class=fa fa-home, class=fa fa-home)
                  @extends('views.site._layouts.page')
 				 @extends('views.site._layouts.page')
 				 @input(x=1,x=2)
@@ -102,8 +102,6 @@ class Steroids
 		while($this->parser->hasCommands($view))
 		{
 			$view = $this->processor->process($view, $this->parser->getFirstCommand());
-
-			break;
 		}
 
 		return $view;

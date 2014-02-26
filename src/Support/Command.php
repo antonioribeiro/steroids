@@ -24,8 +24,11 @@ namespace PragmaRX\Steroids\Support;
 class Command {
 
 	const T_SINGLE_STRING	= 0; // "class=hidden"
+
 	const T_GLOBAL_VARIABLE = 1; // $var=hidden
+
 	const T_LOCAL_VARIABLE  = 2; // #const=1
+
 	const T_HTML_ATTRIBUTE  = 3; // const=1
 
 	private $marker;
@@ -70,10 +73,15 @@ class Command {
 			list($instruction, $template) = $this->parseInstruction($matches[2][0]);
 
 			$this->line = $matches[0][0];
+
 			$this->marker = $matches[1][0];
+
 			$this->instruction = $instruction;
+
 			$this->template = $template;
+
 			$this->parameters = $this->parseParameters($matches[3][0]);
+
 			$this->body = $matches[4][0];
 		}
 
@@ -292,7 +300,7 @@ class Command {
 
 	public function getLength()
 	{
-		return $this->end;
+		return $this->end - $this->start;
 	}
 
 	public function getNumber()
@@ -330,16 +338,20 @@ class Command {
 		return $this->attributes;
 	}
 
-	private function clearMemory() 
+	private function clear()
 	{
 		$this->body = null;
+
 		$this->attributes = array();
+
 		$this->locals = array();
+
+		$this->singleString = '';
 	}
 
 	public function boot()
 	{
-		$this->clearMemory();
+		$this->clear();
 
 		if($this->getLine())
 		{

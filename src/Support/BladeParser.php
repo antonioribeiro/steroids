@@ -57,6 +57,14 @@ class BladeParser {
 		$this->scan();
 
 		$this->enumerateCommands();
+
+		// foreach($this->commands as $command)
+		// {
+		// 	d( $command->getStart()." - ".$command->getEnd()." - ".$command->getLength()." - " );
+		// 	d( substr($this->input, $command->getStart(), $command->getLength()));
+		// }
+
+		// dd("a");
 	}
 
 	private function scan() 
