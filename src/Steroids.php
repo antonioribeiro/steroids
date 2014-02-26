@@ -92,6 +92,18 @@ class Steroids
 				 @@
 		";
 
+		$view = "
+@form(#url=/fodase)
+	@input(#type=date,class=form-input,name=birth-date)
+
+	@input(#type=text,class=form-input,name=name,#label=Name)
+
+	@input(#type=email,class=form-input,name=email,#label=E-mail)
+
+	@input(#type=password,class=form-input,name=password)
+@@
+";
+
 		return $this->processView($view);
 	}
 

@@ -57,14 +57,6 @@ class BladeParser {
 		$this->scan();
 
 		$this->enumerateCommands();
-
-		// foreach($this->commands as $command)
-		// {
-		// 	d( $command->getStart()." - ".$command->getEnd()." - ".$command->getLength()." - " );
-		// 	d( substr($this->input, $command->getStart(), $command->getLength()));
-		// }
-
-		// dd("a");
 	}
 
 	private function scan() 
@@ -86,8 +78,6 @@ class BladeParser {
 
 		foreach ($matches as $key => $match) {
 			$type = $this->getCommandAndType($match[0], $command);
-
-			$command->setString($match[0]);
 
 			$command->setType($type);
 
@@ -150,6 +140,7 @@ class BladeParser {
 	private function enumerateCommands()
 	{
 		$number = 0;
+
 		while($end = $this->getFirstUnumeratedEndCommand())
 		{
 			$start = $this->getPriorUnumeratedBlockCommand($end);
@@ -192,6 +183,8 @@ class BladeParser {
 	{
 		while($line >= 0)
 		{
+			d("line: $line - ".$this->commands[$line]->getLine());
+
 			if ($this->commands[$line]->getType() == static::T_BLOCK_COMMAND && is_null($this->commands[$line]->getNumber()))
 			{
 				return $line;
@@ -200,6 +193,7 @@ class BladeParser {
 			$line--;
 		}
 
+		dd($line);
 		throw new SyntaxError("Found a block end (@@) but not a start. Check if your command has a @_BODY.", 1);
 	}
 

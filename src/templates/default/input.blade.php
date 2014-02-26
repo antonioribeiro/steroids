@@ -1,16 +1,4 @@
-<!-- DEFAULT -->
-
-@if (isset($label)) 
-	<label class="label">{{$label}}</label>
+@if (@_label->has) 
+	<label class="label">@_label</label>
 @endif
-
-<label class="input">
-	@if ($icon)
-		<i class="icon-{{isset($iconAppend) ? 'append' : 'prepend'}} {{$icon}}"></i>
-	@endif
-	<input {{$__attributes}}>
-</label>
-
-@if ($note)
-	<div class="note note-error">{{$note}}</div>
-@endif
+<input type="@_type" @_ATTRIBUTES>

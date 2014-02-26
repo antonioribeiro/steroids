@@ -1,3 +1,1 @@
-<!-- DEFAULT -->
-
-<?php {{$__BODY}}; ?>
+<?php @_BODY; ?>

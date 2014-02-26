@@ -278,11 +278,6 @@ class Command {
 		return array($instruction, $template);
 	}
 
-	public function getString()
-	{
-		return $this->string;
-	}
-
 	public function getType()
 	{
 		return $this->type;
@@ -305,12 +300,7 @@ class Command {
 
 	public function getNumber()
 	{
-		return empty($this->number) ? null : $this->number;
-	}
-
-	public function setString($string)
-	{
-		$this->string = $string;
+		return empty($this->number) && $this->number !== (int) 0 ? null : $this->number;
 	}
 
 	public function setType($type)
