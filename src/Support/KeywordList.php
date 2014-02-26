@@ -128,7 +128,7 @@ class KeywordList {
 
 	private function hasBody($contents) 
 	{
-		return strpos($contents, '$__BODY') !== false;
+		return strpos($contents, '@_BODY') !== false;
 	}
 
 	private function isInDefaultDir($file) 

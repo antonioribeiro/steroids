@@ -54,6 +54,8 @@ class Command {
 
 	private $locals;
 
+	private $singleString = '';
+
 	public function __construct($command) 
 	{
 		$this->parse($command);
@@ -112,6 +114,11 @@ class Command {
 	{
 		return $this->body;
 	}	
+
+	public function setBody($body) 
+	{
+		return $this->body = $body;
+	}
 
 	public function setInstruction($instruction) 
 	{
@@ -193,66 +200,6 @@ class Command {
 		}
 
 		return $parameter;
-
-		//// ----------- keep this for future use
-
-
-
-		if (count($parts) == 1)
-		{
-			${$defaultAttribute} = $parts[0];
-		}
-		else
-		if (count($parts) > 1)
-		{
-			$attrName = $parts[0];
-			$attrValue = $parts[1];
-
-			if (isset($attrValue[0]))
-			{
-				$attrValue = $attrValue[0] == "$" ? '< ?='.$attrValue.'? >' : $attrValue;
-			}
-			else
-			{
-				$attrValue = '';	
-			}
-		
-			$name = $attrName == 'name' ? $attrValue : $name;
-
-			switch ($attrName) {
-				case 'value':
-					$value = $attrValue;
-					break;
-
-				case 'label':
-					$label = $attrValue;
-					break;
-
-				case 'color':
-					$classes[] = "btn-$attrValue";
-					break;
-
-				case 'md':
-					$classes[] = "col-md-$attrValue";
-					break;
-
-				case 'xs':
-					$classes[] = "col-xs-$attrValue";
-					break;
-
-				case 'sm':
-					$classes[] = "col-sm-$attrValue";
-					break;
-
-				case 'class':
-					$classes[] = "$attrValue";
-					break;
-
-				default:
-					$attributes[] = "$attrName=\"$attrValue\"";
-					break;
-			}
-		}
 	}
 
 	private function parseValue($value) 
@@ -343,9 +290,14 @@ class Command {
 		return $this->end;
 	}
 
+	public function getLength()
+	{
+		return $this->end;
+	}
+
 	public function getNumber()
 	{
-		return $this->number;
+		return empty($this->number) ? null : $this->number;
 	}
 
 	public function setString($string)
@@ -382,7 +334,7 @@ class Command {
 	{
 		$this->body = null;
 		$this->attributes = array();
-		$this->local = array();
+		$this->locals = array();
 	}
 
 	public function boot()
@@ -405,6 +357,11 @@ class Command {
 				{
 					$this->addLocal($parameter['variable'], $parameter['value']);
 				}
+				else
+				if ($parameter['type'] == static::T_SINGLE_STRING)
+				{
+					$this->singleString = $parameter['value'];
+				}
 			}
 		}
 	}
@@ -416,32 +373,107 @@ class Command {
 
 	private function addLocal($variable, $value) 
 	{
-		$this->local[$variable] = $value;
+		$this->locals[$variable] = $value;
 	}
 
-	public function processVariables($view)
+	public function getLocals() 
 	{
-		$view = str_replace('@_BODY_@', $this->body, $view);
-
-		$view = str_replace('@_ATTRIBUTES_@', $this->getAttributesString(), $view);
-
-		foreach ($this->local as $key => $value) 
-		{
-			str_replace('@_'.$key.'_@', $value, $view);
-		}
+		return $this->locals;
 	}
 
-	private function getAttributesString($clean = false) 
+	private function getAttributesStrings() 
 	{
+		$attributes = array();
+
 		foreach($this->getAttributes() as $key => $values)
 		{
-			$attributes = @
-			$attributes[] = $key.'="'..'"';
+			$attributes[$key] = implode(' ', $values);
 		}
 
-		dd($attributes);
+		return $attributes;
+	}
 
-		// return 
+	public function getHtmlAttributesString() 
+	{
+		$attributes = array();
+
+		foreach($this->getAttributes() as $key => $values)
+		{
+			$attributes[] = $this->getAttribute($key);
+		}
+
+		return implode(' ', $attributes);
+	}
+
+	public function getAttribute($name, $function = 'plain')
+	{
+		$attributes = $this->getAttributesStrings();
+
+		if ($name == 'VALUE')
+		{
+			return $this->singleString;
+		}
+
+		if ($name == 'ATTRIBUTES')
+		{
+			return $this->getHtmlAttributesString();
+		}
+
+		if ($name == 'BODY')
+		{
+			return $this->getBody();
+		}
+
+		if (isset($attributes[$name]))
+		{
+			if ($function == 'has')
+			{
+				return 'true';
+			}
+			else
+			if ($function == 'bare')
+			{
+				return $attributes[$name];
+			}
+			else
+			{
+				// If the attribute exists but has no name, send just the name
+				// For the cases where we need to create valueless attributes: <div id="name" disabled>
+				if (empty($attributes[$name]))
+				{
+					return $name;
+				}
+				else
+				{
+					return $name.'="'.$attributes[$name].'"';	
+				}
+				
+			}
+		}
+
+		if (isset($this->locals[$name]))
+		{
+			if ($function == 'has')
+			{
+				return 'true';
+			}
+			else
+			{
+				return $this->locals[$name];
+			}
+		}
+
+		if ($function == 'has')
+		{
+			return 'false';
+		}
+	}
+
+	public function hasAttribute($name)
+	{
+		$attributes = $this->getAttributesStrings();
+
+		return isset($attributes[$name]);		
 	}
 
 }

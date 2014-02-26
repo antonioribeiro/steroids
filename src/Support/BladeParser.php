@@ -27,13 +27,18 @@ use Exception;
 
 class BladeParser {
 	const T_LINE_COMMAND        = 1;
+
 	const T_BLOCK_COMMAND       = 2;
+
 	const T_END_COMMAND         = 3;
+
 	const T_NON_COMMAND         = 4;
 
 	private $commands;
 
 	private $keywords = array();
+
+	private $input;
 
 	public function setKeywords($keywords)
 	{
@@ -47,12 +52,14 @@ class BladeParser {
 
 	public function parse($input)
 	{
-		$this->scan($input);
+		$this->input = $input;
+
+		$this->scan();
 
 		$this->enumerateCommands();
 	}
 
-	private function scan($input) 
+	private function scan() 
 	{
 		static $regex;
 
@@ -66,16 +73,20 @@ class BladeParser {
 		}
 
 		$flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE;
-		$matches = preg_split($regex, $input, -1, $flags);
+
+		$matches = preg_split($regex, $this->input, -1, $flags);
 
 		foreach ($matches as $key => $match) {
-			// Must remain before 'value' assignment since it can change content
 			$type = $this->getCommandAndType($match[0], $command);
 
 			$command->setString($match[0]);
+
 			$command->setType($type);
+
 			$command->setStart($match[1]);
-			$command->setEnd(isset($matches[$key+1][1]) ? $matches[$key+1][1] : strlen($input));
+
+			$command->setEnd(isset($matches[$key+1][1]) ? $matches[$key+1][1] : strlen($this->input));
+
 			$command->setNumber(NULL);
 
 			$this->commands[] = $command;
@@ -136,12 +147,26 @@ class BladeParser {
 			$start = $this->getPriorUnumeratedBlockCommand($end);
 
 			$this->commands[$start]->setNumber($number);
+
 			$this->commands[$end]->setNumber($number);
+
+			$this->commands[$start]->setBody($this->getBody($this->commands[$start], $this->commands[$end]));
+
+			$this->commands[$start]->setEnd($this->commands[$end]->getStart() + strlen($this->commands[$end]->getLine()));
 
 			$number++;
 		}
 
 		$this->syntaxCheck();
+	}
+
+	private function getBody($start, $end)
+	{
+		$s = $start->getStart() + strlen($start->getLine());
+
+		$l = $end->getStart()-1-$s;
+
+		return substr($this->input, $s, $l);
 	}
 
 	private function getFirstUnumeratedEndCommand()
@@ -167,7 +192,7 @@ class BladeParser {
 			$line--;
 		}
 
-		throw new SyntaxError("Could not find a code block start.", 1);
+		throw new SyntaxError("Found a block end (@@) but not a start. Check if your command has a @_BODY.", 1);
 	}
 
 	private function syntaxCheck() 
