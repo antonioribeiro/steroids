@@ -68,7 +68,7 @@ class BladeParser {
 		$regex = '/(' . implode(')|(', $this->getCatchablePatterns()) . ')|'
 				   . implode('|', $this->getNonCatchablePatterns()) . '/i';
 
-		$regex = '/(?=@)/';
+		$regex = '/(@@)|(?=@)/';
 
 		$flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE;
 
@@ -86,8 +86,6 @@ class BladeParser {
 			$command->setNumber(NULL);
 
 			$this->commands[] = $command;
-
-			dd($command);
 		}
 	}
 
@@ -153,6 +151,7 @@ class BladeParser {
 
 			$this->commands[$start]->setEnd($this->commands[$end]->getStart() + strlen($this->commands[$end]->getLine()));
 
+			d($this->commands[$start]);
 			$number++;
 		}
 
@@ -207,6 +206,7 @@ class BladeParser {
 			 */
 			if ($command->getType() == static::T_BLOCK_COMMAND && is_null($command->getNumber()))
 			{
+				dd($this->commands);
 				throw new SyntaxError("One or more code blocks are not closed (@@).", 1);
 			}
 		}

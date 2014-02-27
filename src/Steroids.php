@@ -105,9 +105,11 @@ class Steroids
 ";
 
 		$view = <<<CODE
-@input(#type=text,class=form-input,name=name,#label=Name)
+<input type="date" class="form-input" name="birth-date">@input(#type=text,class=form-input,name=name,#label=Name)
 @input(#type=email,class=form-input,name=email,#label=E-mail)
 @input(#type=password,class=form-input,name=password)
+@php
+@@
 CODE;
 
 		return $this->processView($view);
@@ -116,6 +118,11 @@ CODE;
 	public function processView($view)
 	{
 		$this->parser->setKeywords($this->keywordList->all());
+
+		$view = str_replace("\n", "!####n####!", $view);
+		$view = str_replace("\r", "!####r####!", $view);
+
+		dd($view);
 
 		while($this->parser->hasCommands($view))
 		{

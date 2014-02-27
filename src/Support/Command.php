@@ -66,7 +66,7 @@ class Command {
 
 	private function parse($command)
 	{
-		preg_match('/(@{1,2})([\w\.]*)\(?(\w*[^(].*[^)]+)?\)?([.\s]*)?/', $command, $matches, PREG_OFFSET_CAPTURE);
+		preg_match('/(@{1,2})([\w\.]*)\(?(\w*[^(].*[^)]+)?\)\s*?([.\s]*)?/', $command, $matches, PREG_OFFSET_CAPTURE);
 
 		if (count($matches) > 1) 
 		{
