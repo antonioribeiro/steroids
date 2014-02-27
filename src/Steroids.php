@@ -104,6 +104,12 @@ class Steroids
 @@
 ";
 
+		$view = <<<CODE
+@input(#type=text,class=form-input,name=name,#label=Name)
+@input(#type=email,class=form-input,name=email,#label=E-mail)
+@input(#type=password,class=form-input,name=password)
+CODE;
+
 		return $this->processView($view);
 	}
 

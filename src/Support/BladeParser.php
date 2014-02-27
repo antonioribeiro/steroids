@@ -61,16 +61,14 @@ class BladeParser {
 
 	private function scan() 
 	{
-		static $regex;
-
 		$this->commands = array();
 
 		$this->commandCount = 0;
 
-		if ( ! isset($regex)) {
-			$regex = '/(' . implode(')|(', $this->getCatchablePatterns()) . ')|'
+		$regex = '/(' . implode(')|(', $this->getCatchablePatterns()) . ')|'
 				   . implode('|', $this->getNonCatchablePatterns()) . '/i';
-		}
+
+		$regex = '/(?=@)/';
 
 		$flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE;
 
@@ -88,6 +86,8 @@ class BladeParser {
 			$command->setNumber(NULL);
 
 			$this->commands[] = $command;
+
+			dd($command);
 		}
 	}
 
