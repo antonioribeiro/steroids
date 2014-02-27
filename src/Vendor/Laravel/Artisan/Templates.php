@@ -19,7 +19,7 @@ class Templates extends Base {
 	 *
 	 * @var string
 	 */
-	protected $description = 'Publish Steroids templates.';
+	protected $description = 'Publish Steroids templates';
 
 	protected $arguments = array();
 

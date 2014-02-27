@@ -56,7 +56,9 @@ class BladeParser {
 
 		$this->scan();
 
-		$this->enumerateCommands();
+		$this->numberAll();
+
+		$this->syntaxCheck();
 	}
 
 	private function scan() 
@@ -65,14 +67,12 @@ class BladeParser {
 
 		$this->commandCount = 0;
 
-		$regex = '/(' . implode(')|(', $this->getCatchablePatterns()) . ')|'
-				   . implode('|', $this->getNonCatchablePatterns()) . '/i';
-
-		$regex = '/(@@)|(?=@)/';
-
-		$flags = PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE;
-
-		$matches = preg_split($regex, $this->input, -1, $flags);
+		$matches = preg_split(
+								'/(@@)|(\R)|(!####n####!)|(!####r####!)|(?=@)/',
+								$this->input, 
+								-1, 
+								PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE
+							);
 
 		foreach ($matches as $key => $match) {
 			$type = $this->getCommandAndType($match[0], $command);
@@ -87,18 +87,6 @@ class BladeParser {
 
 			$this->commands[] = $command;
 		}
-	}
-
-	protected function getCatchablePatterns()
-	{
-		return array(
-			".*",
-		);
-	}
-
-	protected function getNonCatchablePatterns()
-	{
-		return array('\s+', '(.)');
 	}
 
 	protected function getCommandAndType($value, &$command)
@@ -135,7 +123,7 @@ class BladeParser {
 		return 1;
 	}
 
-	private function enumerateCommands()
+	private function numberAll()
 	{
 		$number = 0;
 
@@ -147,24 +135,28 @@ class BladeParser {
 
 			$this->commands[$end]->setNumber($number);
 
-			$this->commands[$start]->setBody($this->getBody($this->commands[$start], $this->commands[$end]));
+			$this->commands[$start]->setBody($this->getBody($start, $end));
 
 			$this->commands[$start]->setEnd($this->commands[$end]->getStart() + strlen($this->commands[$end]->getLine()));
 
-			d($this->commands[$start]);
 			$number++;
 		}
-
-		$this->syntaxCheck();
 	}
 
 	private function getBody($start, $end)
 	{
-		$s = $start->getStart() + strlen($start->getLine());
+		if ($end > $start+1)
+		{
+			$start = $this->commands[$start];
 
-		$l = $end->getStart()-1-$s;
+			$end = $this->commands[$end];
 
-		return substr($this->input, $s, $l);
+			$s = $start->getStart() + strlen($start->getLine());
+
+			$l = $end->getStart()-1-$s;
+
+			return substr($this->input, $s, $l);
+		}
 	}
 
 	private function getFirstUnumeratedEndCommand()
@@ -182,8 +174,6 @@ class BladeParser {
 	{
 		while($line >= 0)
 		{
-			d("line: $line - ".$this->commands[$line]->getLine());
-
 			if ($this->commands[$line]->getType() == static::T_BLOCK_COMMAND && is_null($this->commands[$line]->getNumber()))
 			{
 				return $line;
@@ -192,7 +182,6 @@ class BladeParser {
 			$line--;
 		}
 
-		dd($line);
 		throw new SyntaxError("Found a block end (@@) but not a start. Check if your command has a @_BODY.", 1);
 	}
 
@@ -206,7 +195,6 @@ class BladeParser {
 			 */
 			if ($command->getType() == static::T_BLOCK_COMMAND && is_null($command->getNumber()))
 			{
-				dd($this->commands);
 				throw new SyntaxError("One or more code blocks are not closed (@@).", 1);
 			}
 		}

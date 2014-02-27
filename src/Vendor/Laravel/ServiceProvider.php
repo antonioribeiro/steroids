@@ -30,6 +30,7 @@ use PragmaRX\Steroids\Support\BladeParser;
 use PragmaRX\Steroids\Support\BladeProcessor;
 
 use PragmaRX\Steroids\Vendor\Laravel\Artisan\Templates as TemplatesCommand;
+use PragmaRX\Steroids\Vendor\Laravel\Artisan\Clear as ClearCommand;
 
 use PragmaRX\Support\ServiceProvider as PragmaRXServiceProvider;
 
@@ -72,7 +73,12 @@ class ServiceProvider extends PragmaRXServiceProvider {
 
         $this->registerTemplatesCommand();
 
+        $this->registerClearCommand();
+
+        $this->registerBladeExtension();
+
         $this->commands('steroids.templates.command');
+        $this->commands('steroids.clear.command');
     }
 
     /**
@@ -163,7 +169,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
     }
 
     /**
-     * Register the Whitelist Artisan command
+     * Register the Templates Artisan command
      *
      * @return void
      */ 
@@ -171,7 +177,29 @@ class ServiceProvider extends PragmaRXServiceProvider {
     {
         $this->app['steroids.templates.command'] = $this->app->share(function($app)
         {
-            return new TemplatesCommand($app['steroids.config']);
+            return new TemplatesCommand();
+        });
+    }
+
+    /**
+     * Register the Clear Artisan command
+     *
+     * @return void
+     */ 
+    private function registerClearCommand()
+    {
+        $this->app['steroids.clear.command'] = $this->app->share(function($app)
+        {
+            return new ClearCommand();
+        });
+    }
+
+    private function registerBladeExtension()
+    {
+        $this->app['view']->getEngineResolver()->resolve('blade')->getCompiler()->extend(function ($view) {
+
+            return $this->app['steroids']->inject($view);
+
         });
     }
 

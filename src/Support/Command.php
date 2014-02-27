@@ -25,7 +25,7 @@ class Command {
 
 	const T_SINGLE_STRING	= 0; // "class=hidden"
 
-	const T_GLOBAL_VARIABLE = 1; // $var=hidden
+	const T_GLOBAL_VARIABLE = 1; // $var=hidden // temporarily deprecated
 
 	const T_LOCAL_VARIABLE  = 2; // #const=1
 
@@ -57,6 +57,8 @@ class Command {
 
 	private $locals;
 
+	private $positionalParameters = array();
+
 	private $singleString = '';
 
 	public function __construct($command) 
@@ -66,23 +68,19 @@ class Command {
 
 	private function parse($command)
 	{
-		preg_match('/(@{1,2})([\w\.]*)\(?(\w*[^(].*[^)]+)?\)\s*?([.\s]*)?/', $command, $matches, PREG_OFFSET_CAPTURE);
+		preg_match('/(?<line>(?<marker>@{1,2})(?<name>[\w\.]*)(\(?(?<parameters>\w*[^(].*[^)]+)?\)\s*)?([.\s]*)?(?<body>.*))/', $command, $matches);
 
 		if (count($matches) > 1) 
 		{
-			list($instruction, $template) = $this->parseInstruction($matches[2][0]);
+			$this->line = $matches['line'];
 
-			$this->line = $matches[0][0];
+			$this->marker = $matches['marker'];
 
-			$this->marker = $matches[1][0];
+			list($this->instruction, $this->template) = $this->parseInstruction($matches['name']);
 
-			$this->instruction = $instruction;
+			$this->parameters = $this->parseParameters($matches['parameters']);
 
-			$this->template = $template;
-
-			$this->parameters = $this->parseParameters($matches[3][0]);
-
-			$this->body = $matches[4][0];
+			$this->body = $matches['body'];
 		}
 
 		$this->boot();
@@ -155,6 +153,8 @@ class Command {
 		$parameters = $this->splitParameters($string);
 
 		foreach ($parameters as $key => $value) {
+			$this->positionalParameters[] = $value;
+
 			$parameters[$key] = $this->parseParameter($value);
 		}	
 
@@ -165,23 +165,26 @@ class Command {
 	{
 		// Check if the parameter is just a ("single string").
 		// 
-		if(preg_match('/^(?:\s*)([\'\"].*[\'\"])(?:\s*)$/', $string, $matches))
+		if(preg_match('/^(?:\s*)(([\'\"])(.*)[\'\"])(?:\s*)$/', $string, $matches))
 		{
 			$parameter['type'] = self::T_SINGLE_STRING;
+
 			$parameter['variable'] = null;
-			$parameter['value'] = $this->parseValue($matches[1]);
+
+			$parameter['value'] = $this->parseValue($matches[3]);
 
 			return $parameter;			
 		}
 
 		// Check for any other type of parameter
-		preg_match('/(?:\s*)([$#\"\']?\w+)?(=\>|=)?(.*)?/', $string, $matches);
+		preg_match('/(?:\s*)([$#\"\']?[a-zA-z0-9\-]+)?(=\>|=)?(.*)?/', $string, $matches);
 
 		$parameter = array();
 
 		if ($matches[2] !== "=")
 		{
 			$parameter['type'] = self::T_HTML_ATTRIBUTE;
+
 			$parameter['variable'] = $this->parseValue($matches[1]);
 		}
 		else
@@ -189,21 +192,26 @@ class Command {
 			$start = 1;
 
 			switch ($matches[1][0]) {
-				case '$':
-					$parameter['type'] = self::T_GLOBAL_VARIABLE;
-					break;
+				// Now using positional parameters ($_1, $_2)
+				// case '$':
+				// 	$parameter['type'] = self::T_GLOBAL_VARIABLE;
+				// 	break;
 
 				case '#':
 					$parameter['type'] = self::T_LOCAL_VARIABLE;
+
 					break;
 				
 				default:
 					$parameter['type'] = self::T_HTML_ATTRIBUTE;
+
 					$start = 0;
+
 					break;
 			}
 
 			$parameter['variable'] = substr($matches[1], $start);
+
 			$parameter['value'] = $this->parseValue($matches[3]);
 		}
 
@@ -426,6 +434,11 @@ class Command {
 			return $this->getBody();
 		}
 
+		if (is_numeric($name))
+		{
+			return $this->positionalParameters[$name-1];
+		}
+
 		if (isset($attributes[$name]))
 		{
 			if ($function == 'has')
@@ -447,7 +460,7 @@ class Command {
 				}
 				else
 				{
-					return $name.'="'.$attributes[$name].'"';	
+					return $name.'='.$this->enquote($attributes[$name]);	
 				}
 				
 			}
@@ -476,6 +489,18 @@ class Command {
 		$attributes = $this->getAttributesStrings();
 
 		return isset($attributes[$name]);		
+	}
+
+	private function enquote($string)
+	{
+		if( ! preg_match('/^(["\']).*\1$/m', $string))
+		{
+			return sprintf('"%s"', $string);
+		}
+		else
+		{
+			return $string;
+		}
 	}
 
 }

@@ -1,7 +1,7 @@
 @php
-  $options = array('url' => '@_url', 'method' => (@_method->has ? '@_method' : 'POST') )
+  $options = array('url' => '@_url', 'method' => ('@_method' ?: 'POST', 'class' => '@_class->bare') )
 @@
 
-{{ Form::open($options)) }}
+{{ Form::open($options) }}
     @_BODY
 {{ Form::close() }}

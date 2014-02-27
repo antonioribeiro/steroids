@@ -59,70 +59,9 @@ class Steroids
 		$this->processor = $processor;
 	}
 
-	public function show() 
-	{
-		$view = "@bootstrap.v2.input(\$vector=array(fodase,1=>x,fodase2,name=>hidden,size=>10),\$fucked=\"no this is not; 'what' I \"think\" it is!\";class=hidden,disabled;#literal=suckme)
-				 @bootstrap.v2.input(#icon=home, placeholder=Your Name, class=bt-blue, class=fa fa-home, class=fa fa-home)
-                 @extends('views.site._layouts.page')
-				 @extends('views.site._layouts.page')
-				 @input(x=1,x=2)
-				 @input(x=1,x=2)
-				 @php
-				 	\$requiredJavascript\[\] = 'javascript.formLoader';
-				 	\$widgetTitle = 'Novo usuário';
-				 	\$widgetIcon = 'fa fa-check';
-				 @@
-				 @box('pageContent')
-				 	<!-- widget grid -->
-				 	<box id=\"widget-grid\" class=\"\">
-				 		@input(x=1,x=2)
-				 		@input(x=1,x=2)
-				 		@input(x=1,x=2)
-				 		@input(x=1,x=2)
-				 		<!-- row -->
-				 			<div class=\"row\">
-				 				@php
-				 					\$requiredJavascript\[\] = 'javascript.formLoader';
-				 					\$widgetTitle = 'Novo usuário';
-				 					\$widgetIcon = 'fa fa-check';
-				 				@@
-				 			</div>
-				 		<!-- row -->
-				 	</box>
-				 @@
-		";
-
-		$view = "
-@form(#url=/fodase)
-	@input(#type=date,class=form-input,name=birth-date)
-
-	@input(#type=text,class=form-input,name=name,#label=Name)
-
-	@input(#type=email,class=form-input,name=email,#label=E-mail)
-
-	@input(#type=password,class=form-input,name=password)
-@@
-";
-
-		$view = <<<CODE
-<input type="date" class="form-input" name="birth-date">@input(#type=text,class=form-input,name=name,#label=Name)
-@input(#type=email,class=form-input,name=email,#label=E-mail)
-@input(#type=password,class=form-input,name=password)
-@php
-@@
-CODE;
-
-		return $this->processView($view);
-	}
-
-	public function processView($view)
+	public function inject($view)
 	{
 		$this->parser->setKeywords($this->keywordList->all());
-
-		$view = str_replace("\n", "!####n####!", $view);
-		$view = str_replace("\r", "!####r####!", $view);
-
-		dd($view);
 
 		while($this->parser->hasCommands($view))
 		{
