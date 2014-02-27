@@ -41,6 +41,8 @@ class Command {
 
 	private $parameters;
 
+	private $parametersString;
+
 	private $body;
 
 	private $string;
@@ -116,6 +118,11 @@ class Command {
 		return $this->parameters;
 	}
 
+	public function getParametersString() 
+	{
+		return $this->parametersString;
+	}
+
 	public function getBody() 
 	{
 		return $this->body;
@@ -150,6 +157,8 @@ class Command {
 
 	private function parseParameters($string) 
 	{
+		$this->parametersString = $string;
+
 		$parameters = $this->splitParameters($string);
 
 		foreach ($parameters as $key => $value) {
@@ -427,6 +436,11 @@ class Command {
 		if ($name == 'ATTRIBUTES')
 		{
 			return $this->getHtmlAttributesString();
+		}
+
+		if ($name == 'PARAMETERS')
+		{
+			return $this->getParametersString();
 		}
 
 		if ($name == 'BODY')
