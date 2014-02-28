@@ -428,7 +428,7 @@ class Command {
 	{
 		$attributes = $this->getAttributesStrings();
 
-		if ($name == 'VALUE')
+		if ($name == 'SINGLE')
 		{
 			return $this->singleString;
 		}
