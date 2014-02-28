@@ -23,7 +23,7 @@ namespace PragmaRX\Steroids\Support;
 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
-use PragmaRX\Exceptions\TemplatesDirectoryNotAvailable;
+use PragmaRX\Steroids\Exceptions\TemplatesDirectoryNotAvailable;
 
 class KeywordList {
 	
