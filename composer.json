@@ -1,7 +1,7 @@
 {
     "name": "pragmarx/steroids",
 
-    "description": "A Laravel 4.1+ IP whitelisting and blacklisting",
+    "description": "Laravel 4 Blade on Steroids",
 
     "keywords": ["steroids", "whitelist", "blacklist", "laravel"],
 
@@ -18,14 +18,13 @@
     "require": {
         "php": ">=5.3.7",
         "illuminate/support": "4.*",
-        "illuminate/cache": "4.*",
         "illuminate/filesystem": "4.*",
-        "pragmarx/support": "0.*",
-        "doctrine/lexer": "dev-master"
+        "pragmarx/support": "0.*"
     },
 
     "require-dev": {
-        "mockery/mockery": "0.8.0"
+        "mockery/mockery": "0.8.0",
+        "phpspec/phpspec": "2.0.*@dev"
     },
 
     "autoload": {
@@ -38,10 +37,10 @@
             "component": "package",
             "frameworks": ["Laravel 4"],
             "versions": {
-                    "0.1.0": "master"
+                    "0.7.0": "master"
             },
             "branch-alias": {
-                    "dev-master": "0.1.0-dev"
+                    "dev-master": "0.7.0-dev"
             }
     },
 

@@ -28,15 +28,8 @@ use Exception;
 
 class BladeProcessor {
 
-	private $config;
-
 	private $variables;
 	
-	public function __construct(Config $config)
-	{
-		$this->config = $config;
-	}
-
 	public function process($view, $command)
 	{
 		$template = $this->getTemplate($view, $command);

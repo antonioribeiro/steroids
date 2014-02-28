@@ -450,7 +450,7 @@ class Command {
 
 		if (is_numeric($name))
 		{
-			return $this->positionalParameters[$name-1];
+			return $this->unquote($this->positionalParameters[$name-1]);
 		}
 
 		if (isset($attributes[$name]))
@@ -474,7 +474,7 @@ class Command {
 				}
 				else
 				{
-					return $name.'='.$this->enquote($attributes[$name]);	
+					return $name.'='.$this->quote($attributes[$name]);	
 				}
 				
 			}
@@ -505,7 +505,7 @@ class Command {
 		return isset($attributes[$name]);		
 	}
 
-	private function enquote($string)
+	private function quote($string)
 	{
 		if( ! preg_match('/^(["\']).*\1$/m', $string))
 		{
@@ -515,6 +515,18 @@ class Command {
 		{
 			return $string;
 		}
+	}
+
+	private function unquote($string)
+	{
+		preg_match('/^(["\'])(.*)\1$/m', $string, $matches);
+
+		if($matches)
+		{
+			return $matches[2];
+		}
+
+		return $string;
 	}
 
 }

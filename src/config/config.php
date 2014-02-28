@@ -24,7 +24,7 @@ return array(
 
     'steroids_alias' => 'Steroids',
 
-    'templates_dir' => app_path().'/config/packages/pragmarx/steroids/templates',
+    'templates_dir' => __DIR__.'/../templates',
 
     'default_template_dir' => '/default',
 

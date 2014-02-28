@@ -1,0 +1,1 @@
+<div class="col-xs-@_1">@_BODY</div>

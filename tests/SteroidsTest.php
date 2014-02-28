@@ -22,26 +22,14 @@
 use Mockery as m;
 
 use PragmaRX\Steroids\Steroids;
+use PragmaRX\Steroids\Support\KeywordList;
+use PragmaRX\Steroids\Support\BladeParser;
+use PragmaRX\Steroids\Support\BladeProcessor;
 
-use PragmaRX\Steroids\Support\Config;
-use PragmaRX\Steroids\Support\Filesystem;
-use PragmaRX\Steroids\Support\CacheManager;
-
-use PragmaRX\Steroids\Repositories\DataRepository;
-
-use PragmaRX\Steroids\Repositories\Steroids\Steroids as SteroidsRepository;
-
-// use PragmaRX\Steroids\Support\Sentence;
-// use PragmaRX\Steroids\Support\Locale;
-// use PragmaRX\Steroids\Support\SentenceBag;
-// use PragmaRX\Steroids\Support\Mode;
-// use PragmaRX\Steroids\Support\MessageSelector;
-
-// use PragmaRX\Steroids\Repositories\DataRepository;
-// use PragmaRX\Steroids\Repositories\Messages\Laravel\Message;
-// use PragmaRX\Steroids\Repositories\Cache\Cache;
-
-use Illuminate\Console\Application;
+use PragmaRX\Support\Config;
+use PragmaRX\Support\Filesystem;
+use Illuminate\Config\Repository;
+use Illuminate\Config\FileLoader;
 
 class SteroidsTest extends PHPUnit_Framework_TestCase {
 
@@ -52,68 +40,87 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 	 */
 	public function setUp()
 	{
-		$this->config = new Config(new Filesystem);
+		$this->namespace = 'PragmaRX\Steroids';
 
-		$steroidsModel = $this->config->get('steroids_model');
-
-		$this->cache = m::mock('PragmaRX\Steroids\Support\CacheManager');
-
-		$this->validIpv4 = '1.1.1.1';
-		$this->invalidIpv4 = '1.1.1';
-
-		$this->validIpv6 = '1:1:1:1:1:1:1:1';
-		$this->invalidIpv6 = '1:1:1:1:1:::1';
+		$this->rootDir = __DIR__.'/../src/config';
 
 		$this->fileSystem = new Filesystem;
 
-		$this->model = m::mock('StdClass');
+		$this->fileLoader = new FileLoader($this->fileSystem, __DIR__);
 
-		$this->cursor = m::mock('StdClass');
+		$this->repository = new Repository($this->fileLoader, 'test');
 
-		$this->dataRepository = new DataRepository(
+        $this->repository->package($this->namespace, $this->rootDir, $this->namespace);
 
-										new SteroidsRepository($this->model, $this->cache),
+		$this->config = new Config($this->repository, $this->namespace);
 
-										$this->config,
+		$this->keywordList = new keywordList($this->config, $this->fileSystem);
 
-										$this->cache,
+		$this->bladeParser = new BladeParser();
 
-										$this->fileSystem
-									);
-
+		$this->bladeProcessor = new BladeProcessor();
 
 		$this->steroids = new Steroids(
-			$this->config,
-			$this->dataRepository,
-			$this->cache,
-			$this->fileSystem
-		);
+										$this->config, 
+										$this->fileSystem, 
+										$this->keywordList,
+										$this->bladeParser,
+										$this->bladeProcessor
+									);
 	}
 
-	public function testValidIP()
+	public function testString0001() 
 	{
-		// IPv4
-		$this->assertTrue($this->steroids->isValid($this->validIpv4));
-		$this->assertFalse($this->steroids->isValid($this->invalidIpv4));
-
-		// IPv6
-		$this->assertTrue($this->steroids->isValid($this->validIpv6));
-		$this->assertFalse($this->steroids->isValid($this->invalidIpv6));
+		$this->assertEquals(
+								'<h1 >Hello, Laravel!</h1>',
+								$this->steroids->inject('@h(1,"Hello, Laravel!")')
+								
+							);
 	}
 
-	public function testReport()
+	public function testString0002() 
 	{
-		$this->model->shouldReceive('all')->andReturn($this->cursor);
-		$this->cursor->shouldReceive('toArray')->andReturn(array());
-
-		$this->assertEquals($this->steroids->report(), array());
+		$this->assertEquals(
+								'<p >Hello, Laravel!</p>',
+								$this->steroids->inject("@p('Hello, Laravel!')")
+							);
 	}
 
-	public function testWhitelist()
+	public function testString0003() 
 	{
-		// $this->cache->shouldReceive('has')->andReturn(true);
-		// $this->cache->shouldReceive('get')->andReturn(true);
-		// $this->assertEquals($this->steroids->whitelist($this->validIpv4), true);
+		$this->assertEquals(
+								$this->steroids->inject("@row @@"),
+								"<div class=\"row\">\n\t\n</div>"
+							);
 	}
 
+	public function testString0004() 
+	{
+		$this->assertEquals(
+								$this->steroids->inject("@form(#url=coming/soon,#method=POST,class=form-inline,#role=form)@@"),
+								"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}"
+							);
+	}
+}
+
+function AsciiToInt($char){
+	$success = "";
+
+    if(strlen($char) == 1)
+        return "char(".ord($char).")";
+    else{
+        for($i = 0; $i < strlen($char); $i++){
+        	if (ord($char[$i]) < 33) {
+	            if($i == strlen($char) - 1)
+	                $success = $success.ord($char[$i]);
+	            else
+	                $success = $success.ord($char[$i]).",";
+	        }
+	        else
+	        {
+	        	$success = $success.$char[$i];
+	        }
+        }
+        return "char(".$success.")";
+    }
 }

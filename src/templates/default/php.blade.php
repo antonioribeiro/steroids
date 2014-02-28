@@ -1,3 +1,3 @@
 <?php 
-	@_BODY; 
+	@_BODY;
 ?>
