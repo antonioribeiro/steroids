@@ -89,16 +89,52 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 	public function testString0003() 
 	{
 		$this->assertEquals(
-								$this->steroids->inject("@row @@"),
-								"<div class=\"row\">\n\t\n</div>"
+								"<div class=\"row\">\n\t\n</div>",
+								$this->steroids->inject("@row @@")
 							);
 	}
 
 	public function testString0004() 
 	{
 		$this->assertEquals(
-								$this->steroids->inject("@form(#url=coming/soon,#method=POST,class=form-inline,#role=form)@@"),
-								"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}"
+								"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}",
+								$this->steroids->inject("@form(#url=coming/soon,#method=POST,class=form-inline,#role=form)@@")
+							);
+	}
+
+	public function testString0005()
+	{
+		$this->assertEquals(
+								"<h1 >Hello Laravel!</h1>",
+								$this->steroids->inject("@h(1,Hello Laravel!)")
+							);
+	}
+
+	public function testString0006()
+	{
+		$this->assertEquals(
+								"<section class=\"col col-1\">\n\t\n</section>",
+								$this->steroids->inject("@sec(1)@@")
+							);
+
+		$this->assertEquals(
+								"<section class=\"col col-10000\">\n\t\n</section>",
+								$this->steroids->inject("@sec(10000)@@")
+							);
+
+		$this->assertEquals(
+								"<section class=\"col col-a\">\n\t\n</section>",
+								$this->steroids->inject("@sec('a')@@")
+							);
+
+		$this->assertEquals(
+								"<section class=\"col col-aaaa\">\n\t\n</section>",
+								$this->steroids->inject("@sec('aaaa')@@")
+							);
+
+		$this->assertEquals(
+								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\n</section>",
+								$this->steroids->inject("@sec('aaaa')Hello, Laravel!@@")
 							);
 	}
 }

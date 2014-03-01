@@ -45,6 +45,8 @@ class Command {
 
 	private $body;
 
+	private $lineBody;
+
 	private $string;
 
 	private $type;
@@ -70,7 +72,9 @@ class Command {
 
 	private function parse($command)
 	{
-		preg_match('/(?<line>(?<marker>@{1,2})(?<name>[\w\.]*)(\(?(?<parameters>\w*[^(].*[^)]+)?\)\s*)?([.\s]*)?(?<body>.*))/', $command, $matches);
+		$this->clear();
+
+		preg_match('/(?<line>(?<marker>@{1,2})(?<name>[\w\.]*)(\(?(?<parameters>\w*[^(].*[^)]*)?\)\s*)?([.\s]*)?(?<body>.*))/', $command, $matches);
 
 		if (count($matches) > 1) 
 		{
@@ -82,7 +86,7 @@ class Command {
 
 			$this->parameters = $this->parseParameters($matches['parameters']);
 
-			$this->body = $matches['body'];
+			$this->setLineBody($matches['body']);
 		}
 
 		$this->boot();
@@ -125,12 +129,17 @@ class Command {
 
 	public function getBody() 
 	{
-		return $this->body;
+		return $this->lineBody . $this->body;
 	}	
 
-	public function setBody($body) 
+	public function setBody($body)
 	{
 		return $this->body = $body;
+	}
+
+	public function setLineBody($body) 
+	{
+		return $this->lineBody = $body;
 	}
 
 	public function setInstruction($instruction) 
@@ -347,7 +356,9 @@ class Command {
 
 	private function clear()
 	{
-		$this->body = null;
+		$this->setBody(null);
+
+		$this->setLineBody(null);
 
 		$this->attributes = array();
 
@@ -358,8 +369,6 @@ class Command {
 
 	public function boot()
 	{
-		$this->clear();
-
 		if ($this->getLine())
 		{
 			foreach($this->getParameters() as $parameter)

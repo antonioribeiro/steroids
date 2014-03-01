@@ -1,1 +1,1 @@
-<link rel="stylesheet" type="text/css" media="screen" href="@_1">
+<link rel="stylesheet" type="text/css" media="screen" href="@_VALUE">

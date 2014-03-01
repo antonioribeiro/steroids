@@ -1,0 +1,1 @@
+<footer>@_BODY</footer>
