@@ -153,7 +153,7 @@ And in your view you just have to:
 
 `@_PARAMETERS`: it's a raw list of parameters, you can use it to pass them forward to an extended command, this is the source of `@text`, which extends `@input`:
 
-    @if(@_name->has)
+    @if (@_name->has)
         @input(text,name=@_1,@_PARAMETERS)
     @else
         @input(text,@_PARAMETERS)

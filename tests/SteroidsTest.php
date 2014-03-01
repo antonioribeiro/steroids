@@ -106,12 +106,12 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 function AsciiToInt($char){
 	$success = "";
 
-    if(strlen($char) == 1)
+    if (strlen($char) == 1)
         return "char(".ord($char).")";
     else{
         for($i = 0; $i < strlen($char); $i++){
         	if (ord($char[$i]) < 33) {
-	            if($i == strlen($char) - 1)
+	            if ($i == strlen($char) - 1)
 	                $success = $success.ord($char[$i]);
 	            else
 	                $success = $success.ord($char[$i]).",";

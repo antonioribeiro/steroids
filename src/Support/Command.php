@@ -174,7 +174,7 @@ class Command {
 	{
 		// Check if the parameter is just a ("single string").
 		// 
-		if(preg_match('/^(?:\s*)(([\'\"])(.*)[\'\"])(?:\s*)$/', $string, $matches))
+		if (preg_match('/^(?:\s*)(([\'\"])(.*)[\'\"])(?:\s*)$/', $string, $matches))
 		{
 			$parameter['type'] = self::T_SINGLE_STRING;
 
@@ -360,7 +360,7 @@ class Command {
 	{
 		$this->clear();
 
-		if($this->getLine())
+		if ($this->getLine())
 		{
 			foreach($this->getParameters() as $parameter)
 			{
@@ -507,7 +507,7 @@ class Command {
 
 	private function quote($string)
 	{
-		if( ! preg_match('/^(["\']).*\1$/m', $string))
+		if ( ! preg_match('/^(["\']).*\1$/m', $string))
 		{
 			return sprintf('"%s"', $string);
 		}
@@ -521,7 +521,7 @@ class Command {
 	{
 		preg_match('/^(["\'])(.*)\1$/m', $string, $matches);
 
-		if($matches)
+		if ($matches)
 		{
 			return $matches[2];
 		}
