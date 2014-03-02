@@ -76,17 +76,19 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 								$this->steroids->inject('@h(1,"Hello, Laravel!")')
 								
 							);
-	}
 
-	public function testString0002() 
-	{
 		$this->assertEquals(
 								'<p >Hello, Laravel!</p>',
 								$this->steroids->inject("@p('Hello, Laravel!')")
 							);
+
+		$this->assertEquals(
+								'<p >Hello Laravel!</p>',
+								$this->steroids->inject("@p(Hello Laravel!)")
+							);
 	}
 
-	public function testString0003() 
+	public function testString0002() 
 	{
 		$this->assertEquals(
 								"<div class=\"row\">\n\t\n</div>",
@@ -94,7 +96,7 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 							);
 	}
 
-	public function testString0004() 
+	public function testString0003() 
 	{
 		$this->assertEquals(
 								"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}",
@@ -102,7 +104,7 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 							);
 	}
 
-	public function testString0005()
+	public function testString0004()
 	{
 		$this->assertEquals(
 								"<h1 >Hello Laravel!</h1>",
@@ -110,7 +112,7 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 							);
 	}
 
-	public function testString0006()
+	public function testString0005()
 	{
 		$this->assertEquals(
 								"<section class=\"col col-1\">\n\t\n</section>",
@@ -137,6 +139,35 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 								$this->steroids->inject("@sec('aaaa')Hello, Laravel!@@")
 							);
 	}
+
+    /**
+     * @expectedException PragmaRX\Steroids\Exceptions\SyntaxError
+     */	
+	public function testString0006()
+	{
+		$this->assertEquals(
+								"<section class=\"col col-1\">\n\t\n</section>",
+								$this->steroids->inject("@sec(1)")
+							);
+
+	}
+
+	public function testString0007()
+	{
+		$this->assertEquals(
+								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n</section>",
+								$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@@")
+							);
+	}
+
+	public function testString0008_block_in_block()
+	{
+		$this->assertEquals(
+								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n<?php \n\t\necho 'Hello, Laravel!';\n?>\n</section>",
+								$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@php\necho 'Hello, Laravel!'\n@@\n@@")
+							);
+	}
+
 }
 
 function AsciiToInt($char){
