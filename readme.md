@@ -263,6 +263,10 @@ Steroids has two artisan commands:
 
     php artisan steroids:templates
 
+`steroids:list` - list all of your Steroids commands
+
+    php artisan steroids:list
+
 `view:clear` - to clear you views cache
 
     php artisan view:clear
