@@ -59,16 +59,42 @@ class Steroids
 		$this->processor = $processor;
 	}
 
-	public function inject($view)
+	public function inject($view, $compiler = null)
 	{
 		$this->parser->setKeywords($this->keywordList->all());
 
-		while($this->parser->hasCommands($view))
+		try 
 		{
-			$view = $this->processor->process($view, $this->parser->getFirstCommand());
+			while($this->parser->hasCommands($view))
+			{
+				$view = $this->processor->process($view, $this->parser->getFirstCommand());
+			}
+		} 
+		catch (\Exception $exception) 
+		{
+			return $this->treatException($exception, $compiler);
 		}
 
 		return $view;
+	}
+
+	private function treatException($exception, $compiler) 
+	{
+		$message = $compiler && method_exists($compiler, 'getPath') 
+					? ' Template path: '.$compiler->getPath() 
+					: '';
+
+		if ($message && method_exists($exception, 'append'))
+		{
+			$exception->append($message);
+		}
+
+		throw $exception;
+	}
+
+	public function getCommands() 
+	{
+		return $this->keywordList->all();
 	}
 
 	public function getConfig($key)

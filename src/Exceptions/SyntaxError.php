@@ -21,6 +21,6 @@
 
 namespace PragmaRX\Steroids\Exceptions;
 
-use Exception;
+use PragmaRX\Support\Exceptions\Exception;
  
 class SyntaxError extends Exception {}
