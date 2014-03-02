@@ -31,6 +31,7 @@ use PragmaRX\Steroids\Support\BladeProcessor;
 
 use PragmaRX\Steroids\Vendor\Laravel\Artisan\Templates as TemplatesCommand;
 use PragmaRX\Steroids\Vendor\Laravel\Artisan\Clear as ClearCommand;
+use PragmaRX\Steroids\Vendor\Laravel\Artisan\Report as ReportCommand;
 
 use PragmaRX\Support\ServiceProvider as PragmaRXServiceProvider;
 
@@ -75,10 +76,15 @@ class ServiceProvider extends PragmaRXServiceProvider {
 
         $this->registerClearCommand();
 
+        $this->registerReportCommand();
+
         $this->registerBladeExtension();
 
         $this->commands('steroids.templates.command');
+
         $this->commands('steroids.clear.command');
+
+        $this->commands('steroids.report.command');
     }
 
     /**
@@ -194,11 +200,24 @@ class ServiceProvider extends PragmaRXServiceProvider {
         });
     }
 
+    /**
+     * Register the Report Artisan command
+     *
+     * @return void
+     */ 
+    private function registerReportCommand()
+    {
+        $this->app['steroids.report.command'] = $this->app->share(function($app)
+        {
+            return new ReportCommand();
+        });
+    }
+
     private function registerBladeExtension()
     {
-        $this->app['view']->getEngineResolver()->resolve('blade')->getCompiler()->extend(function ($view) {
+        $this->app['view']->getEngineResolver()->resolve('blade')->getCompiler()->extend(function ($view, $compiler) {
 
-            return $this->app['steroids']->inject($view);
+            return $this->app['steroids']->inject($view, $compiler);
 
         });
     }
