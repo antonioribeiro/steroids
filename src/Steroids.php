@@ -29,12 +29,32 @@ use PragmaRX\Steroids\Support\BladeProcessor;
 
 class Steroids
 {
+	/**
+	 * Configuration object
+	 * 
+	 * @var Config
+	 */
 	private $config;
 
+	/**
+	 * Filesystem object
+	 * 
+	 * @var Filesystem
+	 */
 	private $fileSystem;
 
+	/**
+	 * KeywordList object
+	 * 
+	 * @var KeywordList
+	 */
 	private $keywordList;
 
+	/**
+	 * BladeParser object
+	 * 
+	 * @var BladeParser
+	 */
 	private $parser;
 
 	/**
@@ -59,6 +79,13 @@ class Steroids
 		$this->processor = $processor;
 	}
 
+	/**
+	 * The main parser and view processor.
+	 * 
+	 * @param  string $view     
+	 * @param  Compiler $compiler 
+	 * @return string
+	 */
 	public function inject($view, $compiler = null)
 	{
 		$this->parser->setKeywords($this->keywordList->all());
@@ -78,6 +105,14 @@ class Steroids
 		return $view;
 	}
 
+	/**
+	 * Exception handler. Will process a handled exception and, if a compiler is available
+	 * add the file name to the error message.
+	 * 
+	 * @param  Exception $exception 
+	 * @param  Compiler $compiler  
+	 * @return void
+	 */
 	private function treatException($exception, $compiler) 
 	{
 		$message = $compiler && method_exists($compiler, 'getPath') 
@@ -92,11 +127,22 @@ class Steroids
 		throw $exception;
 	}
 
+	/**
+	 * Retrieve all commands parsed.
+	 * 
+	 * @return array
+	 */
 	public function getCommands() 
 	{
 		return $this->keywordList->all();
 	}
 
+	/**
+	 * Retrieve a configuration item
+	 * 
+	 * @param  string $key 
+	 * @return mixed
+	 */
 	public function getConfig($key)
 	{
 		return $this->config->get($key);

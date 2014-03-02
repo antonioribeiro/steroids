@@ -28,10 +28,25 @@ use PragmaRX\Steroids\Support\VariableParser;
 
 class KeywordList {
 	
+	/**
+	 * Configuration object
+	 * 
+	 * @var Config
+	 */
 	private $config;
 
+	/**
+	 * Filesystem object
+	 * 
+	 * @var Filesystem
+	 */
 	private $fileSystem;
 
+	/**
+	 * Array with all keywords
+	 * 
+	 * @var array
+	 */
 	private $keywords = array();
 
 	/**
@@ -48,6 +63,11 @@ class KeywordList {
 		$this->load();
 	}
 
+	/**
+	 * Load all keywords from disk
+	 * 
+	 * @return void
+	 */
 	private function load() 
 	{
 		foreach($this->getFiles($this->getTemplatesDir()) as $file)
@@ -56,11 +76,22 @@ class KeywordList {
 		}
 	}
 
+	/**
+	 * Retrieve all keywords.
+	 * 
+	 * @return string
+	 */
 	public function all()
 	{
 		return $this->keywords;
 	}
 
+	/**
+	 * Get the list of keywords files and directories.
+	 * 	
+	 * @param  string $dir
+	 * @return array
+	 */
 	private function getFiles($dir) 
 	{
 		if ( ! $this->fileSystem->isDirectory($dir))
@@ -71,6 +102,11 @@ class KeywordList {
 		return $this->fileSystem->allFiles($dir);
 	}
 
+	/**
+	 * Load a file, parse it and add a keyword to the list.
+	 * 
+	 * @param string $file
+	 */
 	private function addKeyword($file) 
 	{
 		$keyword = $this->makeKeyword($file);
@@ -87,16 +123,32 @@ class KeywordList {
 		$this->keywords = array_merge_recursive($this->keywords, $tree);
 	}
 
+	/**
+	 * Retrieves the templates directory.
+	 * 
+	 * @return string
+	 */
 	private function getTemplatesDir() 
 	{
 		return $this->config->get('templates_dir');
 	}
 
+	/**
+	 * Retrieves the templates directory of the default commands.
+	 * 
+	 * @return string
+	 */
 	private function getDefaultTemplateDir() 
 	{
 		return $this->getTemplatesDir() . $this->config->get('default_template_dir');
 	}	
 
+	/**
+	 * Make a filename.
+	 * 
+	 * @param  string $file 
+	 * @return string
+	 */
 	private function makeFileName($file) 
 	{
 		if ( ! is_string($file))
@@ -107,6 +159,12 @@ class KeywordList {
 		return $this->getTemplatesDir().slash().$file;
 	}
 
+	/**
+	 * Parse a file to create a keyword.
+	 * 	
+	 * @param  string $file
+	 * @return array
+	 */
 	private function makeKeyword($file) 
 	{
 		if ( ! $keyword = $file->getBasename('.blade.php'))
@@ -130,11 +188,23 @@ class KeywordList {
 		);
 	}
 
+	/**
+	 * Check if the keyword has a body.
+	 * 
+	 * @param  string  $contents 
+	 * @return boolean           
+	 */
 	private function hasBody($contents) 
 	{
 		return strpos($contents, '@_BODY') !== false;
 	}
 
+	/**
+	 * Check if the keyword file is in the default directory.
+	 * 
+	 * @param  string  $file 
+	 * @return boolean
+	 */
 	private function isInDefaultDir($file) 
 	{
 		return $this->makeFileName($file) === $this->getDefaultTemplateDir().slash().$file->getBasename();

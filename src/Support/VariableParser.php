@@ -23,8 +23,18 @@ namespace PragmaRX\Steroids\Support;
 
 class VariableParser {
 
+	/**
+	 * All variables.
+	 * 
+	 * @var array
+	 */
 	private $variables;
 
+	/**
+	 * VariableParser object constructor.
+	 * 
+	 * @param string $template
+	 */
 	public function __construct($template = null) 
 	{
 		if ($template)
@@ -33,6 +43,12 @@ class VariableParser {
 		}
 	}
 
+	/**
+	 * Parse the template and return all variables it has.
+	 * 
+	 * @param  string $template 
+	 * @return array
+	 */
 	public function parse($template)
 	{
 		$count = preg_match_all('/(@_\w*->\w*)|(@_\w*)/', $template, $matches, PREG_OFFSET_CAPTURE);
@@ -58,6 +74,12 @@ class VariableParser {
 		return $count;
 	}
 
+	/**
+	 * Parse a single variable.
+	 * 
+	 * @param  string $text 
+	 * @return array
+	 */
 	private function parseVariable($text)
 	{
 		preg_match_all('/@_(\w*)(?:->)?(\w*)?/', $text, $matches);
@@ -65,11 +87,21 @@ class VariableParser {
 		return array($matches[1][0], $matches[2][0]);
 	}
 
+	/**
+	 * Retrieve all variables.
+	 * 
+	 * @return array
+	 */
 	public function all() 
 	{
 		return $this->variables;
 	}
 
+	/**
+	 * Retrieves the first variable.
+	 * 	
+	 * @return array
+	 */
 	public function first()
 	{
 		if (isset($this->variables[0]))

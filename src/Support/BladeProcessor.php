@@ -29,8 +29,14 @@ use Exception;
 
 class BladeProcessor {
 
-	private $variables;
-	
+	/**
+	 * Process the view by retrieving the template and replacing 
+	 * the command with the compiled result.
+	 * 
+	 * @param  string $view    
+	 * @param  Command $command 
+	 * @return string          
+	 */
 	public function process($view, $command)
 	{
 		$template = $this->getTemplate($view, $command);
@@ -38,6 +44,13 @@ class BladeProcessor {
 		return substr_replace($view, $template, $command->getStart(), $command->getLength());
 	}
 
+	/**
+	 * Retrieve the template and replace all variables with the values user passed.
+	 * 
+	 * @param  string $view    
+	 * @param  Command $command 
+	 * @return string          
+	 */
 	private function getTemplate($view, $command)
 	{
 		$template = $command->getInstruction()['template'];
@@ -59,6 +72,15 @@ class BladeProcessor {
 		return $template;
 	}
 
+	/**
+	 * Replace a value.
+	 * 
+	 * @param  integer $start   
+	 * @param  integer $size    
+	 * @param  string $string  
+	 * @param  string $subject 
+	 * @return string          
+	 */
 	private function replace($start, $size, $string, $subject)
 	{
 		return substr_replace($subject, $string, $start, $size);

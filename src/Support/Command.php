@@ -23,57 +23,178 @@ namespace PragmaRX\Steroids\Support;
  
 class Command {
 
+	/**
+	 * Single string type.
+	 */
 	const T_SINGLE_STRING	= 0; // "class=hidden"
 
+	/**
+	 * Global varialbe type.
+	 */
 	const T_GLOBAL_VARIABLE = 1; // $var=hidden // temporarily deprecated
 
+	/**
+	 * Local variable type.
+	 */
 	const T_LOCAL_VARIABLE  = 2; // #const=1
 
+	/**
+	 * HTML attribute type.
+	 */
 	const T_HTML_ATTRIBUTE  = 3; // const=1
 
+	/**
+	 * Command marker (@ or @@).
+	 * 
+	 * @var string
+	 */
 	private $marker;
 
+	/**
+	 * Command line.
+	 * 
+	 * @var string
+	 */
 	private $line;
 
+	/**
+	 * Instruction name. In the example @input, 'input' is the instruction.
+	 * 	
+	 * @var string
+	 */
 	private $instruction;
 
+	/**
+	 * Template string.
+	 * 
+	 * @var string
+	 */
 	private $template;
 
-	private $parameters;
+	/**
+	 * Parameters list
+	 * 
+	 * @var array
+	 */
+	private $parameters = array();
 
+	/**
+	 * Raw parameters string
+	 * 
+	 * @var string
+	 */
 	private $parametersString;
 
+	/** 
+	 * Command body.
+	 *
+	 * 	@input
+	 * 	  This is the body
+	 * 	@@
+	 * @var [type]
+	 */
 	private $body;
 
+	/**
+	 * Command body, the one sent in the same line of the command
+	 *
+	 * 	 @php $x = 'this is a body in the same line' @
+	 * 
+	 * @var string
+	 */
 	private $lineBody;
 
-	private $string;
-
+	/**
+	 * Command type
+	 * 
+	 * @var integer
+	 */
 	private $type;
 
+	/**
+	 * Starting position of the command in the view
+	 * 
+	 * @var integer
+	 */
 	private $start;
 
+	/**
+	 * Ending position of the command in the view
+	 * 
+	 * @var integer
+	 */
 	private $end;
 
+	/**
+	 * Command block number. All blocks are numerated.
+	 * 
+	 * @var integer
+	 */
 	private $number;
 
-	private $attributes;
+	/**
+	 * HTMl attributes passed as parameters.
+	 * 
+	 * @var array
+	 */
+	private $attributes = array();
 
-	private $locals;
+	/**
+	 * Local variables passed as parameters.
+	 * 		
+	 * @var array
+	 */
+	private $locals = array();
 
+	/**
+	 * List of all positional parameters.
+	 * 
+	 * @var array
+	 */
 	private $positionalParameters = array();
 
+	/**
+	 * Single string parameter.
+	 *
+	 * 		@h1(this is the single string passed as one single parameter)
+	 * 		
+	 * @var string
+	 */
 	private $singleString = '';
 
+	/**
+	 * Class constructor.
+	 * 
+	 * @param string $command
+	 */
 	public function __construct($command) 
 	{
 		$this->parse($command);
 	}
 
+	/**
+	 * Analyses a string to find a command on it and also parse all it's parameters.
+	 * 
+	 * @param  string $command
+	 * @return void
+	 */
 	private function parse($command)
 	{
 		$this->clear();
 
+		$this->parseCommandLine($command);
+
+		$this->setAllAttributesTypes();
+	}
+
+	/**
+	 * Parse a command line string.
+	 * 
+	 * @param  string $command 
+	 * @return void
+	 */
+	private function parseCommandLine($command) 
+	{
 		preg_match('/(?<line>(?<marker>@{1,2})(?<name>[\w\.]*)(\(?(?<parameters>\w*[^(].*[^)]*)?\)\s*)?([.\s]*)?(?<body>.*))/', $command, $matches);
 
 		if (count($matches) > 1) 
@@ -88,65 +209,146 @@ class Command {
 
 			$this->setLineBody($matches['body']);
 		}
-
-		$this->boot();
 	}
 
+	/**
+	 * Retrieves the command line.
+	 * 
+	 * @return string
+	 */
 	public function getLine() 
 	{
 		return $this->line;
 	}
 
+	/**
+	 * Retrieves the command marker.
+	 * 	
+	 * @return string
+	 */
 	public function getMarker() 
 	{
 		return $this->marker;
 	}
 
+	/**
+	 * Retrieves the command instruction.
+	 * 	
+	 * @return string
+	 */
 	public function getInstruction() 
 	{
 		return $this->instruction;
 	}
 
+	/**
+	 * Retrieves the whole instruction.
+	 * 	
+	 * @return string
+	 */
 	public function getFullInstruction() 
 	{
 		return $this->getTemplate() . '.' . $this->instruction;
 	}
 
+	/**
+	 * Retrieves the template.
+	 * 	
+	 * @return string
+	 */
 	public function getTemplate() 
 	{
 		return $this->template;
 	}
 
+	/**
+	 * Retrieves the list of parameters.
+	 * 	
+	 * @return array
+	 */
 	public function getParameters() 
 	{
 		return $this->parameters;
 	}
 
+	/**
+	 * Retrieves the parameters string.
+	 * @return string
+	 */
 	public function getParametersString() 
 	{
 		return $this->parametersString;
 	}
 
+	/**
+	 * Retrieves the command body.
+	 * 	
+	 * @return string
+	 */
 	public function getBody() 
 	{
 		return $this->lineBody . $this->body;
 	}	
 
+	/**
+	 * Sets the command body.
+	 * 
+	 * @param string $body
+	 * @return  string
+	 */
 	public function setBody($body)
 	{
 		return $this->body = $body;
 	}
 
+	/**
+	 * Sets the command 'in the same line' body
+	 * 
+	 * @param string $body
+	 * @return string
+	 */
 	public function setLineBody($body) 
 	{
 		return $this->lineBody = $body;
 	}
 
+	/**
+	 * Set the command instruction.
+	 * 
+	 * @param string $instruction
+	 */
 	public function setInstruction($instruction) 
 	{
 		$this->instruction = $instruction;
 	}
 
+	/**
+	 * Parse command parameters.
+	 * 
+	 * @param  string $string 
+	 * @return array
+	 */
+	private function parseParameters($string) 
+	{
+		$this->parametersString = $string;
+
+		$parameters = $this->splitParameters($string);
+
+		foreach ($parameters as $key => $value) {
+			$this->positionalParameters[] = $value;
+
+			$parameters[$key] = $this->parseParameter($value);
+		}	
+
+		return $parameters;		
+	}
+
+	/**
+	 * Split a string of parameters in an array of parameters.
+	 * 
+	 * @param  string $string
+	 * @return array
+	 */
 	private function splitParameters($string) 
 	{
 		preg_match_all("/(?:\'[^\']*[^\"]\'|\"[^\"]*[^\']*\"|\[.*\]|\(.*\)|)\K(,|;|$)/", $string, $matches, PREG_OFFSET_CAPTURE);
@@ -164,21 +366,13 @@ class Command {
 		return $parameters;
 	}
 
-	private function parseParameters($string) 
-	{
-		$this->parametersString = $string;
-
-		$parameters = $this->splitParameters($string);
-
-		foreach ($parameters as $key => $value) {
-			$this->positionalParameters[] = $value;
-
-			$parameters[$key] = $this->parseParameter($value);
-		}	
-
-		return $parameters;		
-	}
-
+	/** 
+	 * Parse one single parameter, separating name, operator and value
+	 *     #name=Laravel
+	 *     
+	 * @param  [type] $string [description]
+	 * @return [type]         [description]
+	 */
 	private function parseParameter($string) 
 	{
 		// Check if the parameter is just a ("single string").
@@ -236,6 +430,13 @@ class Command {
 		return $parameter;
 	}
 
+	/**
+	 * Parse the value of the parameter. Basically if the parameter is an array
+	 * it will transform it in a real array, otherwise will return the string.
+	 * 
+	 * @param  string $value 
+	 * @return mixed
+	 */
 	private function parseValue($value) 
 	{
 		if (is_array($value = $this->parseArray($value)))
@@ -246,6 +447,12 @@ class Command {
 		return $value;
 	}
 
+	/**
+	 * Check if the parameter is an array and return the array or a string.
+	 * 
+	 * @param  string $value
+	 * @return mixed
+	 */
 	private function parseArray($value) 
 	{
 		preg_match('/^(?:array\(|\[)(.*)(?:\)|\])$/', $value, $matches);
@@ -258,6 +465,12 @@ class Command {
 		return $value;
 	}
 
+	/**
+	 * Parse all array items.
+	 * 
+	 * @param  string $arrayItems
+	 * @return array
+	 */
 	private function parseArrayItems($arrayItems) 
 	{
 		$items = array();
@@ -273,6 +486,12 @@ class Command {
 		return $items;
 	}
 
+	/**
+	 * Parse one array item.
+	 * 
+	 * @param  string $item 
+	 * @return array
+	 */
 	private function parseArrayItem($item) 
 	{
 		preg_match('/([$#]?\w+)?(=\>|=)?(.*)?/', $item, $matches);
@@ -283,6 +502,13 @@ class Command {
 		return array($key, $this->parseArray($value));
 	}
 
+	/**
+	 * Get the next array key by its number.
+	 * 
+	 * @param  array $array  
+	 * @param  integer $number 
+	 * @return integer
+	 */
 	private function nextArrayKey($array, &$number)
 	{
 		while(isset($array[$number]))
@@ -293,6 +519,14 @@ class Command {
 		return $number;
 	}
 
+	/**
+	 * Parse the instruction name to separate the name from the folder:
+	 * 
+	 * 		bootstrap.input
+	 * 		
+	 * @param  [type] $string [description]
+	 * @return [type]         [description]
+	 */
 	private function parseInstruction($string) 
 	{
 		$parts = explode('.', $string);
@@ -304,56 +538,111 @@ class Command {
 		return array($instruction, $template);
 	}
 
+	/**
+	 * Retrieves the type of command.
+	 * 
+	 * @return string
+	 */
 	public function getType()
 	{
 		return $this->type;
 	}
 
+	/**
+	 * Retrieves the starting position of the command.
+	 * 
+	 * @return integer
+	 */
 	public function getStart()
 	{
 		return $this->start;
 	}
 
+	/**
+	 * Retrieves the ending position of the command.
+	 * 
+	 * @return integer
+	 */
 	public function getEnd()
 	{
 		return $this->end;
 	}
 
+	/**
+	 * Retrieves the length of the command.
+	 * 
+	 * @return integer
+	 */
 	public function getLength()
 	{
 		return $this->end - $this->start;
 	}
 
+	/**
+	 * Retrieves the numberm of a command, but only block commands are numbered.
+	 * 
+	 * @return integer
+	 */
 	public function getNumber()
 	{
 		return empty($this->number) && $this->number !== (int) 0 ? null : $this->number;
 	}
 
+	/**
+	 * Sets the command type.
+	 * 
+	 * @return void
+	 */
 	public function setType($type)
 	{
 		$this->type = $type;
 	}
 
+	/**
+	 * Sets the command starting position
+	 * 
+	 * @param integer $start 
+	 */
 	public function setStart($start)
 	{
 		$this->start = $start;
 	}
 
+	/**
+	 * Sets the command ending position.
+	 * 
+	 * @param integer $end 
+	 */
 	public function setEnd($end)
 	{
 		$this->end = $end;
 	}
 
+	/**
+	 * Sets the command number.
+	 * 
+	 * @param integer $number 
+	 */
 	public function setNumber($number)
 	{
 		$this->number = $number;
 	}
 
+	/**
+	 * Retrieves the command attributes.
+	 * 	
+	 * @return array
+	 */
 	public function getAttributes() 
 	{
 		return $this->attributes;
 	}
 
+	/**
+	 * Clear commands properties to prepare for a new parse.
+	 * 
+	 * @return string
+	 */
 	private function clear()
 	{
 		$this->setBody(null);
@@ -367,7 +656,12 @@ class Command {
 		$this->singleString = '';
 	}
 
-	public function boot()
+	/**
+	 * Guess and set the type of all attributes.
+	 *
+	 * @return  void
+	 */
+	public function setAllAttributesTypes()
 	{
 		if ($this->getLine())
 		{
@@ -394,21 +688,43 @@ class Command {
 		}
 	}
 
+	/**
+	 * Add an attribute to the list of attributes.
+	 * 
+	 * @param string $variable 
+	 * @param mixed $value 
+	 */
 	private function addAtribute($variable, $value) 
 	{
 		$this->attributes[$variable][$value] = $value;
 	}
 
+	/**
+	 * Add a local variable to the list of variables.
+	 * 
+	 * @param string $variable 
+	 * @param mixed $value 
+	 */
 	private function addLocal($variable, $value) 
 	{
 		$this->locals[$variable] = $value;
 	}
 
+	/**
+	 * Retrieve the list of local variables.
+	 * 
+	 * @return array
+	 */
 	public function getLocals() 
 	{
 		return $this->locals;
 	}
 
+	/**
+	 * Get a string with all attributes.
+	 * 	
+	 * @return string
+	 */
 	private function getAttributesStrings() 
 	{
 		$attributes = array();
@@ -421,6 +737,11 @@ class Command {
 		return $attributes;
 	}
 
+	/**
+	 * Get the string of HTML attributes.
+	 * 
+	 * @return [type] [description]
+	 */
 	public function getHtmlAttributesString() 
 	{
 		$attributes = array();
@@ -433,6 +754,13 @@ class Command {
 		return implode(' ', $attributes);
 	}
 
+	/**
+	 * Get a single attribute string.
+	 * 
+	 * @param  string $name     
+	 * @param  string $function 
+	 * @return string
+	 */
 	public function getAttribute($name, $function = 'plain')
 	{
 		$attributes = $this->getAttributesStrings();
@@ -507,6 +835,12 @@ class Command {
 		}
 	}
 
+	/**
+	 * Check if an attribute is available.
+	 * 
+	 * @param  string  $name 
+	 * @return boolean      
+	 */
 	public function hasAttribute($name)
 	{
 		$attributes = $this->getAttributesStrings();
@@ -514,6 +848,12 @@ class Command {
 		return isset($attributes[$name]);		
 	}
 
+	/**
+	 * Quote a string.
+	 * 
+	 * @param  string $string 
+	 * @return string
+	 */
 	private function quote($string)
 	{
 		if ( ! preg_match('/^(["\']).*\1$/m', $string))
@@ -526,6 +866,12 @@ class Command {
 		}
 	}
 
+	/**
+	 * Unquote a string
+	 * 
+	 * @param  string $string 
+	 * @return string
+	 */
 	private function unquote($string)
 	{
 		preg_match('/^(["\'])(.*)\1$/m', $string, $matches);
