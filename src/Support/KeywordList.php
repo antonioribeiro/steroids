@@ -24,6 +24,7 @@ namespace PragmaRX\Steroids\Support;
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
 use PragmaRX\Steroids\Exceptions\TemplatesDirectoryNotAvailable;
+use PragmaRX\Steroids\Support\VariableParser;
 
 class KeywordList {
 	
@@ -117,11 +118,14 @@ class KeywordList {
 
 		$hasBody = $this->hasBody($fileContents);
 
+		$variableParser = new VariableParser($fileContents);
+
 		return array(
 			$keyword => array(
 							'keyword' => $keyword, 
 							'hasBody' => $hasBody, 
-							'template' => $fileContents
+							'template' => $fileContents,
+							'variables' => $variableParser->all(),
 						)
 		);
 	}
@@ -135,4 +139,5 @@ class KeywordList {
 	{
 		return $this->makeFileName($file) === $this->getDefaultTemplateDir().slash().$file->getBasename();
 	}
+
 }

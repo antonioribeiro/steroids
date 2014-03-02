@@ -23,6 +23,7 @@ namespace PragmaRX\Steroids\Support;
 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
+use PragmaRX\Steroids\Support\VariableParser;
 
 use Exception;
 
@@ -41,49 +42,21 @@ class BladeProcessor {
 	{
 		$template = $command->getInstruction()['template'];
 
-		while($this->parseVariables($template))
+		$variableParser = new VariableParser($template);
+
+		while($variableParser->parse($template))
 		{
+			$variable = $variableParser->first();
+
 			$template = $this->replace(
-										$this->variables[0]['start'], 
-										strlen($this->variables[0]['text']), 
-										$command->getAttribute($this->variables[0]['name'], $this->variables[0]['function']),
+										$variable['start'], 
+										strlen($variable['text']), 
+										$command->getAttribute($variable['name'], $variable['function']),
 										$template
 									);
 		}
 
 		return $template;
-	}
-
-	private function parseVariables($template)
-	{
-		$count = preg_match_all('/(@_\w*->\w*)|(@_\w*)/', $template, $matches, PREG_OFFSET_CAPTURE);
-
-		$this->variables = array();
-
-		foreach($matches[0] as $match)
-		{
-			$text = $match[0];
-
-			$start = $match[1];
-
-			list($variable, $function) = $this->parseVariable($text);
-
-			$this->variables[] = array(
-										'text' => $text,
-										'start' => $start,
-										'name' => $variable,
-										'function' => empty($function) ? 'plain' : $function,
-									);
-		}
-
-		return $count;
-	}
-
-	private function parseVariable($text)
-	{
-		preg_match_all('/@_(\w*)(?:->)?(\w*)?/', $text, $matches);
-
-		return array($matches[1][0], $matches[2][0]);
 	}
 
 	private function replace($start, $size, $string, $subject)
