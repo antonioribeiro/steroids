@@ -1,4 +1,4 @@
-# Steroids v0.7.0
+# Steroids v0.7
 
 [![Latest Stable Version](https://poser.pugx.org/pragmarx/steroids/v/stable.png)](https://packagist.org/packages/pragmarx/steroids) [![License](https://poser.pugx.org/pragmarx/steroids/license.png)](https://packagist.org/packages/pragmarx/steroids)
 
