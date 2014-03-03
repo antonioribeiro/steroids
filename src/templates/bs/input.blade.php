@@ -1,4 +1,4 @@
-<!--DEFAULT-->
+<!--BS-->
 @if (@_label->has) 
 	<label class="label">@_label</label>
 @endif
