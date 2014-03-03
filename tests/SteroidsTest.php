@@ -69,72 +69,82 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 									);
 	}
 
-	public function testString0001() 
+	public function testPatternH1WithTwoNonAssignmentStrings() 
 	{
-		$this->assertEquals(
+		$this->equals(
 								'<h1 >Hello, Laravel!</h1>',
 								$this->steroids->inject('@h(1,"Hello, Laravel!")')
-								
-							);
-
-		$this->assertEquals(
-								'<p >Hello, Laravel!</p>',
-								$this->steroids->inject("@p('Hello, Laravel!')")
-							);
-
-		$this->assertEquals(
-								'<p >Hello Laravel!</p>',
-								$this->steroids->inject("@p(Hello Laravel!)")
 							);
 	}
 
-	public function testString0002() 
+	public function testPatternH1WithTwoNonAssignmentStringsNoQuotes()
 	{
-		$this->assertEquals(
-								"<div class=\"row\">\n\t\n</div>",
-								$this->steroids->inject("@row @@")
-							);
-	}
-
-	public function testString0003() 
-	{
-		$this->assertEquals(
-								"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}",
-								$this->steroids->inject("@form(#url=coming/soon,#method=POST,class=form-inline,#role=form)@@")
-							);
-	}
-
-	public function testString0004()
-	{
-		$this->assertEquals(
+		$this->equals(
 								"<h1 >Hello Laravel!</h1>",
 								$this->steroids->inject("@h(1,Hello Laravel!)")
 							);
 	}
 
-	public function testString0005()
+	public function testPatternPWithSingleString() 
 	{
-		$this->assertEquals(
+		$this->equals(
+								'<p >Hello, Laravel!</p>',
+								$this->steroids->inject("@p('Hello, Laravel!')")
+							);
+	}
+
+	public function testPatternPWithSingleStringNoQuotes() 
+	{
+		$this->equals(
+								'<p >Hello Laravel!</p>',
+								$this->steroids->inject("@p(Hello Laravel!)")
+							);
+
+	}
+
+	public function testPatternEmptyRowBlock() 
+	{
+		$this->equals(
+								"<div class=\"row\">\n\t\n</div>",
+								$this->steroids->inject("@row @@")
+							);
+	}
+
+	public function testPatternSecBlockWithNoBody()
+	{
+		$this->equals(
 								"<section class=\"col col-1\">\n\t\n</section>",
 								$this->steroids->inject("@sec(1)@@")
 							);
+	}
 
-		$this->assertEquals(
+	public function testPatternSecBlockWithNoBodyAndBigNumber()
+	{
+		$this->equals(
 								"<section class=\"col col-10000\">\n\t\n</section>",
 								$this->steroids->inject("@sec(10000)@@")
 							);
+	}
 
-		$this->assertEquals(
+	public function testPatternSecBlockWithNoBodyAndQuotedValue()
+	{
+		$this->equals(
 								"<section class=\"col col-a\">\n\t\n</section>",
 								$this->steroids->inject("@sec('a')@@")
 							);
+	}	
 
-		$this->assertEquals(
-								"<section class=\"col col-aaaa\">\n\t\n</section>",
-								$this->steroids->inject("@sec('aaaa')@@")
+	public function testPatternSecBlockWithNoBodyAndBiggerQuotedValue()
+	{
+		$this->equals(
+								"<section class=\"col col-aaaaaaaaaaaaaaaa\">\n\t\n</section>",
+								$this->steroids->inject("@sec('aaaaaaaaaaaaaaaa')@@")
 							);
+	}
 
-		$this->assertEquals(
+	public function testPatternSecBlockWithBody()
+	{
+		$this->equals(
 								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\n</section>",
 								$this->steroids->inject("@sec('aaaa')Hello, Laravel!@@")
 							);
@@ -143,29 +153,89 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
     /**
      * @expectedException PragmaRX\Steroids\Exceptions\SyntaxError
      */	
-	public function testString0006()
+	public function testRaisesSyntaxError()
 	{
-		$this->assertEquals(
+		$this->equals(
 								"<section class=\"col col-1\">\n\t\n</section>",
 								$this->steroids->inject("@sec(1)")
 							);
 
 	}
 
-	public function testString0007()
+	public function testPatternSecBlockWithTwoLinesBody()
 	{
-		$this->assertEquals(
+		$this->equals(
 								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n</section>",
 								$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@@")
 							);
 	}
 
-	public function testString0008_block_in_block()
+	public function testPatternFormSeverelAssignmentsAndNoBody()
 	{
-		$this->assertEquals(
+		$this->equals(
+								"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}",
+								$this->steroids->inject("@form(#url=coming/soon,#method=POST,class=form-inline,#role=form)@@")
+							);
+	}
+
+	public function testBlockInBlock()
+	{
+		$this->equals(
 								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n<?php \n\t\necho 'Hello, Laravel!';\n?>\n</section>",
 								$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@php\necho 'Hello, Laravel!'\n@@\n@@")
 							);
+	}
+
+	public function testCheckIsLoadingFromTheCorrectDir()
+	{
+		$this->assertContains(
+								'<!--BS-->', 
+								$this->steroids->inject("@bs.input(name=loading)")
+		);
+
+		$this->assertContains(
+								'<!--DEFAULT-->', 
+								$this->steroids->inject("@input(name=loading)")
+		);
+	}
+
+	public function testSingleAssignment()
+	{
+		$this->equals(
+								'<p class="laravel">whatever string</p>',
+								$this->steroids->inject("@p(whatever string,class=laravel)")
+							);
+	}
+
+	public function testMultipleAssignments()
+	{
+		$this->equals(
+								"<div title=\"Hi there!\" placeholder=\"Hi there!\">\n\tHello, Laravel!\n</div>",
+								$this->steroids->inject("@d(#label=title=placeholder=Hi there!)Hello, Laravel!@@")
+							);
+	}
+
+	public function testHtmlAttributeWithNoValue()
+	{
+		$this->equals(
+								"<div disabled enabled>\n\tHello, Laravel!\n</div>",
+								$this->steroids->inject("@d(disabled,enabled)Hello, Laravel!@@")
+							);
+	}
+
+	public function testHtmlAttributeWithDashedName()
+	{
+		$this->equals(
+								"<div label-data=\"x\">\n\tHello, Laravel!\n</div>",
+								$this->steroids->inject("@d(label-data=\"x\")Hello, Laravel!@@")
+							);
+	}
+
+	public function equals($s1, $s2)
+	{
+		$this->assertEquals(AsciiToInt($s1), AsciiToInt($s2));
+
+		$this->assertEquals($s1, $s2); /// just to certify we don't have a test bug
 	}
 
 }
@@ -181,7 +251,7 @@ function AsciiToInt($char){
 	            if ($i == strlen($char) - 1)
 	                $success = $success.ord($char[$i]);
 	            else
-	                $success = $success.ord($char[$i]).",";
+	                $success = $success.ord($char[$i]);
 	        }
 	        else
 	        {

@@ -334,13 +334,22 @@ class Command {
 
 		$parameters = $this->splitParameters($string);
 
+		$return = array();
+
 		foreach ($parameters as $key => $value) {
 			$this->positionalParameters[] = $value;
 
-			$parameters[$key] = $this->parseParameter($value);
-		}	
+			try {
+				foreach($this->parseParameter($value) as $parameter)
+				{
+					$return[] = $parameter;
+				}
+			} catch (\Exception $e) {
+				dd($value)	;
+			}
+		}
 
-		return $parameters;		
+		return $return;
 	}
 
 	/**
@@ -354,6 +363,7 @@ class Command {
 		preg_match_all("/(?:\'[^\']*[^\"]\'|\"[^\"]*[^\']*\"|\[.*\]|\(.*\)|)\K(,|;|$)/", $string, $matches, PREG_OFFSET_CAPTURE);
 
 		$parameters = array();
+
 		$start = 0;
 
 		foreach(range(0,count($matches[1])-1) as $i)
@@ -368,42 +378,162 @@ class Command {
 
 	/** 
 	 * Parse one single parameter, separating name, operator and value
-	 *     #name=Laravel
+	 *   #name=Laravel
 	 *     
-	 * @param  [type] $string [description]
-	 * @return [type]         [description]
+	 * @param  string $string
+	 * @return array
 	 */
 	private function parseParameter($string) 
 	{
-		// Check if the parameter is just a ("single string").
-		// 
+		if ($this->checkParameterIsAssignment($string, $parts) 
+			|| $this->checkParameterIsSingleString($string, $parts)
+			|| $this->checkParameterIsAnyOtherType($string, $parts))
+		{
+			return $parts;
+		}
+
+		return array();
+	}
+
+	/**
+	 * Check if the parameter is one or multiple assignments
+	 *
+	 * 		@d(#label=name=Name)
+	 * 		
+	 * @param  string
+	 * @param  $parameter
+	 * @return boolean
+	 */
+	private function checkParameterIsAssignment($string, &$parts) 
+	{
+		$parts = array();
+
+		$pos = 0;
+
+		preg_match_all("/(?:\'[^\']*[^\"]\'|\"[^\"]*[^\']*\"|\[.*\]|\(.*\)|)\K(=|=>|$)/", $string, $matches, PREG_OFFSET_CAPTURE);
+
+		if( ! $matches || empty($matches[0][0][0]))
+		{
+			return false;
+		}
+
+		$value = substr($string, $matches[0][count($matches[0])-2][1]+1);
+
+		foreach(range(0, count($matches[0])-2) as $i)
+		{
+			preg_match("/(?<type>[(\$#])?(?<name>.*)/", substr($string, $pos, $matches[0][$i][1]-$pos), $name);
+
+			$pos = $matches[0][$i][1]+1;
+
+			$parts[] = $this->setParameterType(
+												array(
+														'type' => $name['type'], 
+														'name' => $name['name'], 
+														'value' => $value
+													)
+												);
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if the parameter is a single string
+	 *
+	 * 		@d(this is a single string)
+	 * 		
+	 * @param  string
+	 * @param  $parameter
+	 * @return boolean
+	 */
+	private function checkParameterIsSingleString($string, &$parts)
+	{
+		$parts = array();
+
+		// Is this a quoted string?
 		if (preg_match('/^(?:\s*)(([\'\"])(.*)[\'\"])(?:\s*)$/', $string, $matches))
 		{
-			$parameter['type'] = self::T_SINGLE_STRING;
-
-			$parameter['variable'] = null;
-
-			$parameter['value'] = $this->parseValue($matches[3]);
-
-			return $parameter;			
-		}
-
-		// Check for any other type of parameter
-		preg_match('/(?:\s*)([$#\"\']?[a-zA-z0-9\-]+)?(=\>|=)?(.*)?/', $string, $matches);
-
-		$parameter = array();
-
-		if ($matches[2] !== "=")
-		{
-			$parameter['type'] = self::T_HTML_ATTRIBUTE;
-
-			$parameter['variable'] = $this->parseValue($matches[1]);
+			$value = $this->parseValue($matches[3]);
 		}
 		else
-		{
-			$start = 1;
 
-			switch ($matches[1][0]) {
+		// Does the string has one or more spaces on it?
+		if (preg_match('/^(.*\s+.*)+$/', $string, $matches))
+		{
+			$value = $string;
+		}
+		else
+
+		// Is this it just a number? 
+		if (is_numeric($string))
+		{
+			$value = $string;
+		}
+
+		if (isset($value))
+		{
+			$parts['type'] = self::T_SINGLE_STRING;
+
+			$parts['name'] = null;
+
+			$parts['value'] = $value;
+
+			$parts = array($parts);
+		}
+
+		return count($parts) > 0;
+	}
+
+	/**
+	 * Checks if the parameter is a is a one word HTML attribute, like "disabled":
+	 * 
+	 * 		<div disabled></div>
+	 * 		
+	 * @param  [type] $string [description]
+	 * @param  [type] $parts  [description]
+	 * @return [type]         [description]
+	 */
+	private function checkParameterIsAnyOtherType($string, &$parts) 
+	{
+		preg_match('/(?:\s*)([$#\"\']?[a-zA-z0-9\-]+)?(=\>|=)*(.*)?/', $string, $matches);
+
+		$parts = array();
+
+		if ($matches)
+		{
+			$parts = array(
+						array(
+								'type' => self::T_HTML_ATTRIBUTE, 
+								'name' => $this->parseValue($matches[0])
+							)
+					);
+
+			return true;
+		}
+	}
+
+	/**
+	 * Set all parameters types.
+	 * 
+	 * @param array $parameters
+	 */
+	private function setParametersTypes($parameters) 
+	{
+		foreach($parameters as $key => $parameter)
+		{
+			$parameters[$key] = $this->setParameterType($parameter);
+		}
+	}
+
+	/**
+	 * Set a parameter type.
+	 * 
+	 * @param array $parameter
+	 */
+	private function setParameterType($parameter) 
+	{
+		switch ($parameter['type']) 
+		{
 				// Now using positional parameters ($_1, $_2)
 				// case '$':
 				// 	$parameter['type'] = self::T_GLOBAL_VARIABLE;
@@ -420,11 +550,6 @@ class Command {
 					$start = 0;
 
 					break;
-			}
-
-			$parameter['variable'] = substr($matches[1], $start);
-
-			$parameter['value'] = $this->parseValue($matches[3]);
 		}
 
 		return $parameter;
@@ -671,13 +796,17 @@ class Command {
 				{
 					if (isset($parameter['value']))
 					{
-						$this->addAtribute($parameter['variable'], $parameter['value']);		
+						$this->addAtribute($parameter['name'], $parameter['value']);		
+					}
+					else
+					{
+						$this->addAtribute($parameter['name']);
 					}
 				}
 				else
 				if ($parameter['type'] == static::T_LOCAL_VARIABLE)
 				{
-					$this->addLocal($parameter['variable'], $parameter['value']);
+					$this->addLocal($parameter['name'], $parameter['value']);
 				}
 				else
 				if ($parameter['type'] == static::T_SINGLE_STRING)
@@ -694,9 +823,11 @@ class Command {
 	 * @param string $variable 
 	 * @param mixed $value 
 	 */
-	private function addAtribute($variable, $value) 
+	private function addAtribute($variable, $value = null) 
 	{
-		$this->attributes[$variable][$value] = $value;
+		$key = $value ?: $variable;
+
+		$this->attributes[$variable][$key] = $value;
 	}
 
 	/**
