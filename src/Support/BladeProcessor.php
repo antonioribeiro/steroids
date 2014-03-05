@@ -53,7 +53,9 @@ class BladeProcessor {
 	 */
 	private function getTemplate($view, $command)
 	{
-		$template = $command->getInstruction()['template'];
+		$instruction = $command->getInstruction();
+		
+		$template = $instruction['template'];
 
 		$variableParser = new VariableParser($template);
 
