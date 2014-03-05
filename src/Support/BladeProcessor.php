@@ -57,10 +57,8 @@ class BladeProcessor {
 
 		$variableParser = new VariableParser($template);
 
-		while($variableParser->parse($template))
+		while($variable = $variableParser->first($template))
 		{
-			$variable = $variableParser->first();
-
 			$template = $this->replace(
 										$variable['start'], 
 										strlen($variable['text']), 

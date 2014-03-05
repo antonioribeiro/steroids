@@ -50,6 +50,13 @@ class KeywordList {
 	private $keywords = array();
 
 	/**
+	 * Templates directory.
+	 * 	
+	 * @var string
+	 */
+	private $templatesDir;
+
+	/**
 	 * Initialize Steroids object
 	 * 
 	 * @param Locale $locale
@@ -130,7 +137,7 @@ class KeywordList {
 	 */
 	private function getTemplatesDir() 
 	{
-		return $this->config->get('templates_dir');
+		return $this->templatesDir ?: $this->config->get('templates_dir');
 	}
 
 	/**
@@ -167,7 +174,7 @@ class KeywordList {
 	 */
 	private function makeKeyword($file) 
 	{
-		if ( ! $keyword = $file->getBasename('.blade.php'))
+		if ( ! $keyword = $this->getKeywordName($file))
 		{
 			return;
 		}
@@ -186,6 +193,25 @@ class KeywordList {
 							'variables' => $variableParser->all(),
 						)
 		);
+	}
+
+	/**
+	 * Extract the keyword from the filename.
+	 * 
+	 * @param  Symfony\Component\Finder\SplFileInfo $file 
+	 * @return string       
+	 */
+	private function getKeywordName($file) 
+	{
+		$keyword = $file->getBasename('.blade.php');
+
+		// If the file still has extention, it's not a good one.
+		if (strpos($keyword, '.') !== false)
+		{
+			return;
+		}
+
+		return $keyword;
 	}
 
 	/**
@@ -210,4 +236,15 @@ class KeywordList {
 		return $this->makeFileName($file) === $this->getDefaultTemplateDir().slash().$file->getBasename();
 	}
 
+	/**
+	 * Set the templates path.
+	 * 
+	 * @param string $path
+	 */
+	public function setTemplatesDir($dir) 
+	{
+		$this->templatesDir = $dir;
+
+		$this->load();		
+	}
 }

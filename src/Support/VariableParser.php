@@ -21,6 +21,8 @@
 
 namespace PragmaRX\Steroids\Support;
 
+use PragmaRX\Steroids\Support\Constant;
+
 class VariableParser {
 
 	/**
@@ -102,9 +104,9 @@ class VariableParser {
 	 * 	
 	 * @return array
 	 */
-	public function first()
+	public function first($variables)
 	{
-		if (isset($this->variables[0]))
+		if ($this->parse($variables))
 		{
 			return $this->variables[0];
 		}

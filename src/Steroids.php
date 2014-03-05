@@ -148,4 +148,14 @@ class Steroids
 		return $this->config->get($key);
 	}
 
+	/**
+	 * Set the templates dir.
+	 * 
+	 * @param string $dir
+	 */
+	public function setTemplatesDir($dir) 
+	{
+		$this->keywordList->setTemplatesDir($dir);
+	}
+
 }

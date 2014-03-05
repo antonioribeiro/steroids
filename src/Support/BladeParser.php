@@ -89,16 +89,6 @@ class BladeParser {
 	}
 
 	/**
-	 * Add a new keyword to the list
-	 * 
-	 * @param array $keyword 
-	 */
-	public function addKeyword($keyword)
-	{
-		$this->keywords[] = $keyword;
-	}
-
-	/**
 	 * Parse the view
 	 * 
 	 * @param  string $input 
@@ -316,9 +306,11 @@ class BladeParser {
 		{
 			if ($command->getType() == static::T_BLOCK_COMMAND || $command->getType() == static::T_LINE_COMMAND)
 			{
-				return $command;
+				break;
 			}
 		}
+
+		return $command;
 	}
 
 }
