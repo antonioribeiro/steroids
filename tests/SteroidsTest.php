@@ -72,82 +72,82 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 	public function testPatternH1WithTwoNonAssignmentStrings() 
 	{
 		$this->equals(
-								'<h1 >Hello, Laravel!</h1>',
-								$this->steroids->inject('@h(1,"Hello, Laravel!")')
-							);
+						'<h1 >Hello, Laravel!</h1>',
+						$this->steroids->inject('@h(1,"Hello, Laravel!")')
+					);
 	}
 
 	public function testPatternH1WithTwoNonAssignmentStringsNoQuotes()
 	{
 		$this->equals(
-								"<h1 >Hello Laravel!</h1>",
-								$this->steroids->inject("@h(1,Hello Laravel!)")
-							);
+						"<h1 >Hello Laravel!</h1>",
+						$this->steroids->inject("@h(1,Hello Laravel!)")
+					);
 	}
 
-	public function testPatternPWithSingleString() 
+	public function testPatternPWithPositionalString()
 	{
 		$this->equals(
-								'<p >Hello, Laravel!</p>',
-								$this->steroids->inject("@p('Hello, Laravel!')")
-							);
+						'<p >Hello, Laravel!</p>',
+						$this->steroids->inject("@p('Hello, Laravel!')")
+					);
 	}
 
-	public function testPatternPWithSingleStringNoQuotes() 
+	public function testPatternPWithPositionalStringNoQuotes() 
 	{
 		$this->equals(
-								'<p >Hello Laravel!</p>',
-								$this->steroids->inject("@p(Hello Laravel!)")
-							);
+						'<p >Hello Laravel!</p>',
+						$this->steroids->inject("@p(Hello Laravel!)")
+					);
 
 	}
 
 	public function testPatternEmptyRowBlock() 
 	{
 		$this->equals(
-								"<div class=\"row\">\n\t\n</div>",
-								$this->steroids->inject("@row @@")
-							);
+						"<div class=\"row\">\n\t\n</div>",
+						$this->steroids->inject("@row @@")
+					);
 	}
 
 	public function testPatternSecBlockWithNoBody()
 	{
 		$this->equals(
-								"<section class=\"col col-1\">\n\t\n</section>",
-								$this->steroids->inject("@sec(1)@@")
-							);
+						"<section class=\"col col-1\">\n\t\n</section>",
+						$this->steroids->inject("@sec(1)@@")
+					);
 	}
 
 	public function testPatternSecBlockWithNoBodyAndBigNumber()
 	{
 		$this->equals(
-								"<section class=\"col col-10000\">\n\t\n</section>",
-								$this->steroids->inject("@sec(10000)@@")
-							);
+						"<section class=\"col col-10000\">\n\t\n</section>",
+						$this->steroids->inject("@sec(10000)@@")
+					);
 	}
 
 	public function testPatternSecBlockWithNoBodyAndQuotedValue()
 	{
 		$this->equals(
-								"<section class=\"col col-a\">\n\t\n</section>",
-								$this->steroids->inject("@sec('a')@@")
-							);
+						"<section class=\"col col-a\">\n\t\n</section>",
+						$this->steroids->inject("@sec('a')@@")
+					);
 	}	
 
 	public function testPatternSecBlockWithNoBodyAndBiggerQuotedValue()
 	{
 		$this->equals(
-								"<section class=\"col col-aaaaaaaaaaaaaaaa\">\n\t\n</section>",
-								$this->steroids->inject("@sec('aaaaaaaaaaaaaaaa')@@")
-							);
+						"<section class=\"col col-aaaaaaaaaaaaaaaa\">\n\t\n</section>",
+						$this->steroids->inject("@sec('aaaaaaaaaaaaaaaa')@@")
+					);
 	}
 
 	public function testPatternSecBlockWithBody()
 	{
 		$this->equals(
-								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\n</section>",
-								$this->steroids->inject("@sec('aaaa')Hello, Laravel!@@")
-							);
+						"<section class=\"col col-aaaa\">\n\tHello, Laravel!\n</section>",
+						$this->steroids->inject("@sec('aaaa')Hello, Laravel!@@")
+					);
 	}
 
     /**
@@ -156,34 +156,42 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 	public function testRaisesSyntaxError()
 	{
 		$this->equals(
-								"<section class=\"col col-1\">\n\t\n</section>",
-								$this->steroids->inject("@sec(1)")
-							);
+						"<section class=\"col col-1\">\n\t\n</section>",
+						$this->steroids->inject("@sec(1)")
+					);
 
 	}
 
 	public function testPatternSecBlockWithTwoLinesBody()
 	{
 		$this->equals(
-								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n</section>",
-								$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@@")
-							);
+						"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n</section>",
+						$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@@")
+					);
 	}
 
 	public function testPatternFormSeverelAssignmentsAndNoBody()
 	{
 		$this->equals(
-								"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}",
-								$this->steroids->inject("@form(#url=coming/soon,#method=POST,class=form-inline,#role=form)@@")
-							);
+						"<?php \n\t\n  \$options = array(\n  \t\t\t\t\t'url' => 'coming/soon', \n  \t\t\t\t\t'method' => ('POST' ?: 'POST'), \n  \t\t\t\t\t'class' => 'form-inline',\n  \t\t\t\t\t'role' => true ? 'form' : 'default'\n  \t\t\t\t);\n?>\n\n{{ Form::open(\$options) }}\n    \n{{ Form::close() }}",
+						$this->steroids->inject("@form(#url=coming/soon,#method=POST,class=form-inline,#role=form)@@")
+					);
 	}
 
 	public function testBlockInBlock()
 	{
 		$this->equals(
-								"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n<?php \n\t\necho 'Hello, Laravel!';\n?>\n</section>",
-								$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@php\necho 'Hello, Laravel!'\n@@\n@@")
-							);
+						"<section class=\"col col-aaaa\">\n\tHello, Laravel!\nHello, Laravel, Again!\n<?php \n\t\necho 'Hello, Laravel!';\n?>\n</section>",
+						$this->steroids->inject("@sec('aaaa')Hello, Laravel!\nHello, Laravel, Again!\n@php\necho 'Hello, Laravel!'\n@@\n@@")
+					);
+	}
+
+	public function testNonExsistentCommand()
+	{
+		$this->equals(
+						"@thisisanonexistentcommand",
+						$this->steroids->inject("@thisisanonexistentcommand")
+					);
 	}
 
 	public function testCheckIsLoadingFromTheCorrectDir()
@@ -202,33 +210,113 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 	public function testSingleAssignment()
 	{
 		$this->equals(
-								'<p class="laravel">whatever string</p>',
-								$this->steroids->inject("@p(whatever string,class=laravel)")
-							);
+						'<p class="laravel">whatever string</p>',
+						$this->steroids->inject("@p(whatever string,class=laravel)")
+					);
 	}
 
 	public function testMultipleAssignments()
 	{
 		$this->equals(
-								"<div title=\"Hi there!\" placeholder=\"Hi there!\">\n\tHello, Laravel!\n</div>",
-								$this->steroids->inject("@d(#label=title=placeholder=Hi there!)Hello, Laravel!@@")
-							);
+						"<div title=\"Hi there!\" placeholder=\"Hi there!\">\n\tHello, Laravel!\n</div>",
+						$this->steroids->inject("@d(#label=title=placeholder=Hi there!)Hello, Laravel!@@")
+					);
 	}
 
 	public function testHtmlAttributeWithNoValue()
 	{
 		$this->equals(
-								"<div disabled enabled>\n\tHello, Laravel!\n</div>",
-								$this->steroids->inject("@d(disabled,enabled)Hello, Laravel!@@")
-							);
+						"<div disabled enabled>\n\tHello, Laravel!\n</div>",
+						$this->steroids->inject("@d(disabled,enabled)Hello, Laravel!@@")
+					);
 	}
 
 	public function testHtmlAttributeWithDashedName()
 	{
 		$this->equals(
-								"<div label-data=\"x\">\n\tHello, Laravel!\n</div>",
-								$this->steroids->inject("@d(label-data=\"x\")Hello, Laravel!@@")
-							);
+						"<div label-data=\"x\">\n\tHello, Laravel!\n</div>",
+						$this->steroids->inject("@d(label-data=\"x\")Hello, Laravel!@@")
+					);
+	}
+
+	public function testSameAttributePassedTwiceShouldBeOnlyOneAttribute()
+	{
+		$this->equals(
+						"<div class=\"a b\">\n\tHello, Laravel!\n</div>",
+						$this->steroids->inject("@d(class=a,class=b)Hello, Laravel!@@")
+					);
+	}
+
+	public function testPatternCssWithSingleString()
+	{
+		$this->equals(
+						"<link rel=\"stylesheet\" type=\"text/css\" media=\"screen\" href=\"/assets/css/bootstrap.min.css\">",
+						$this->steroids->inject("@css(/assets/css/bootstrap.min.css)")
+					);
+	}
+
+	public function testPatternTextWithResendingParameters()
+	{
+		$this->equals(
+						"@if(true)\n\t<!--DEFAULT-->\n@if (true) \n\t<label class=\"label\">false</label>\n@endif\n<input type=\"text\" text name=\"first_name\" class=\"form-input\" />\n@else\n\t<!--DEFAULT-->\n@if (true) \n\t<label class=\"label\">false</label>\n@endif\n<input type=\"text\" text class=\"form-input\" />\n@endif",
+						$this->steroids->inject("@text(#name=first_name,class=form-input)")
+					);
+	}
+
+    /**
+     * @expectedException PragmaRX\Steroids\Exceptions\SyntaxError
+     */	
+	public function testRaisesSyntaxErrorOn()
+	{
+		$this->steroids->inject("@row @@ @@");
+	}
+
+    /**
+     * @expectedException PragmaRX\Steroids\Exceptions\TemplatesDirectoryNotAvailable
+     */	
+	public function testRaisesErrorOnNonExistentTemplatesDir()
+	{
+		$this->steroids->setTemplatesDir('/ihopethisisanonexistentpathinyourroot');
+	}
+
+	public function testLoadingAWrongFile()
+	{
+		$this->steroids->setTemplatesDir(__DIR__.'/templates');
+
+		$this->steroids->inject("@notvalidfilename");
+
+		$this->equals(
+						"@notvalidfilename",
+						$this->steroids->inject("@notvalidfilename")
+					);
+	}
+
+    /**
+     * @expectedException PragmaRX\Steroids\Exceptions\SyntaxError
+     */	
+	public function testExceptionWithCompiler()
+	{
+		$this->equals(
+						"@notvalidfilename",
+						$this->steroids->inject("@row @@ @@", new CompilerForTest)
+					);
+	}
+
+	public function testGetConfig()
+	{
+		$this->equals(
+						"/default",
+						$this->steroids->getConfig("default_template_dir")
+					);
+	}
+
+	public function testGetCommands()
+	{
+		/// Must return 2 directories bs and default:
+		$this->assertEquals(
+						2,
+						count($this->steroids->getCommands())
+					);
 	}
 
 	public function equals($s1, $s2)
