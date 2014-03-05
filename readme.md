@@ -1,6 +1,6 @@
 # Steroids v0.7
 
-[![Latest Stable Version](https://poser.pugx.org/pragmarx/steroids/v/stable.png)](https://packagist.org/packages/pragmarx/steroids) [![License](https://poser.pugx.org/pragmarx/steroids/license.png)](https://packagist.org/packages/pragmarx/steroids)
+[![Latest Stable Version](https://poser.pugx.org/pragmarx/steroids/v/stable.png)](https://packagist.org/packages/pragmarx/steroids) [![License](https://poser.pugx.org/pragmarx/steroids/license.png)](https://packagist.org/packages/pragmarx/steroids) [![Build Status](https://travis-ci.org/antonioribeiro/steroids.png)](https://travis-ci.org/antonioribeiro/steroids)
 
 ## Laravel 4 Blade on Steroids
 
@@ -302,12 +302,13 @@ Copy the templates examples to your app folder:
 
     php artisan steroids:templates
 
+### Tests
+
+- Steroids Tests Coverage is at 100%
 
 ### TODO
 
 - Invalidate main templates when a Steroids command changes
-
-- Add more tests
 
 ### Author
 
