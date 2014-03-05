@@ -1,6 +1,6 @@
 # Steroids v0.7
 
-[![Latest Stable Version](https://poser.pugx.org/pragmarx/steroids/v/stable.png)](https://packagist.org/packages/pragmarx/steroids) [![License](https://poser.pugx.org/pragmarx/steroids/license.png)](https://packagist.org/packages/pragmarx/steroids) [![Build Status](https://travis-ci.org/antonioribeiro/steroids.png)](https://travis-ci.org/antonioribeiro/steroids) ![Latest Stable Version](https://coveralls.io/repos/antonioribeiro/steroids/badge.png)](https://coveralls.io/r/antonioribeiro/steroids)
+[![Latest Stable Version](https://poser.pugx.org/pragmarx/steroids/v/stable.png)](https://packagist.org/packages/pragmarx/steroids) [![License](https://poser.pugx.org/pragmarx/steroids/license.png)](https://packagist.org/packages/pragmarx/steroids) [![Build Status](https://travis-ci.org/antonioribeiro/steroids.png)](https://travis-ci.org/antonioribeiro/steroids) [![Latest Stable Version](https://coveralls.io/repos/antonioribeiro/steroids/badge.png)](https://coveralls.io/r/antonioribeiro/steroids)
 
 ## Laravel 4 Blade on Steroids
 
