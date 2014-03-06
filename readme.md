@@ -145,6 +145,20 @@ And in your view you just have to:
         ... your controls ...
     @@
 
+#### Assignment and Multi Assignment
+
+You assign values to local (#) variables by using the equal sign:
+
+    @text(#label=form-control)
+
+You assign values to html attributes by doing the same, just don't put the hash sign:
+
+    @text(class=form-control)
+
+And you can also do multi assignments:
+
+    @text(#label=title=First Name,class=form-control)
+
 ### Superglobals (licentia poetica)
 
 `@_BODY`: will be replaced by your command body
