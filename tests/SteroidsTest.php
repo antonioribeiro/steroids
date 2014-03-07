@@ -344,6 +344,27 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 								'<!--label1--><label class="label">Name</label><!--/label1-->', 
 								$this->steroids->inject("@input(text,#label=title=Name)")
 		);
+
+		$this->assertContains(
+								'<!--label1--><label class="label">Name</label><!--/label1-->', 
+								$this->steroids->inject("@text(text,#label=title=Name)")
+		);
+	}
+
+	public function testTemplatesAreCorrectlyLoaded()
+	{
+		$this->steroids->setTemplatesDir(__DIR__.'/templates');
+
+		$keywords = $this->steroids->getCommands();
+
+		// 4 valid templates in /templates
+		$this->assertEquals(4, count($keywords['default']));
+
+		// 4 properties in input
+		$this->assertEquals(4, count($keywords['default']['input']));
+
+		// input keyword must be a string
+		$this->assertTrue(is_string($keywords['default']['input']['keyword']));
 	}
 
 }
