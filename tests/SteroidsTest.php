@@ -69,6 +69,13 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 									);
 	}
 
+	public function equals($s1, $s2)
+	{
+		$this->assertEquals(AsciiToInt($s1), AsciiToInt($s2));
+
+		$this->assertEquals($s1, $s2); /// just to certify we don't have a test bug
+	}
+
 	public function testPatternH1WithTwoNonAssignmentStrings() 
 	{
 		$this->equals(
@@ -319,11 +326,24 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 					);
 	}
 
-	public function equals($s1, $s2)
+	public function testGetACorrectVariableValue()
 	{
-		$this->assertEquals(AsciiToInt($s1), AsciiToInt($s2));
+		$this->steroids->setTemplatesDir(__DIR__.'/templates');
 
-		$this->assertEquals($s1, $s2); /// just to certify we don't have a test bug
+		$this->equals(
+						"label=Name - title=Name",
+						$this->steroids->inject("@variable(#label=title=Name)")
+					);
+	}
+
+	public function testLabelIsPrintedCorrectly()
+	{
+		$this->steroids->setTemplatesDir(__DIR__.'/templates');
+
+		$this->assertContains(
+								'<!--label1--><label class="label">Name</label><!--/label1-->', 
+								$this->steroids->inject("@input(text,#label=title=Name)")
+		);
 	}
 
 }

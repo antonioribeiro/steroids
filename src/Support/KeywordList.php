@@ -118,6 +118,7 @@ class KeywordList {
 	{
 		if ($keyword = $this->makeKeyword($file))
 		{
+			d($keyword);
 			if (! $this->isInDefaultDir($file) && $file->getRelativePath() !== '')
 			{
 				$tree = explodeTree(array($file->getRelativePath() => $keyword), slash());

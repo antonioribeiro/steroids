@@ -39,6 +39,7 @@ class BladeProcessor {
 	 */
 	public function process($view, $command)
 	{
+		var_dump($command);
 		$template = $this->getTemplate($view, $command);
 
 		return substr_replace($view, $template, $command->getStart(), $command->getLength());
