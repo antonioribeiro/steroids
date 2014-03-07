@@ -77,6 +77,8 @@ class KeywordList {
 	 */
 	private function load() 
 	{
+		$this->keywords = array();
+
 		foreach($this->getFiles($this->getTemplatesDir()) as $file)
 		{
 			$this->addKeyword($file);
@@ -118,7 +120,6 @@ class KeywordList {
 	{
 		if ($keyword = $this->makeKeyword($file))
 		{
-			d($keyword);
 			if (! $this->isInDefaultDir($file) && $file->getRelativePath() !== '')
 			{
 				$tree = explodeTree(array($file->getRelativePath() => $keyword), slash());
