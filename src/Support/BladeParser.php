@@ -29,35 +29,6 @@ use Exception;
 class BladeParser {
 
 	/**
-	 * Line commands start with @ and have no block ending
-	 * 
-	 * 		@h1(this is a line command)
-	 * 		
-	 */
-	const T_LINE_COMMAND        = 1;
-
-	/**
-	 * Block commands start with @ and must end with @@
-	 *
-	 * 		@php
-	 * 			$var = 'this is a block command';
-	 * 		@@
-	 */
-	const T_BLOCK_COMMAND       = 2;
-
-	/**
-	 * The block ending marker: @@
-	 * 
-	 */
-	const T_END_COMMAND         = 3;
-
-	/** 
-	 * Everything which is not a command
-	 * 
-	 */
-	const T_NON_COMMAND         = 4;
-
-	/**
 	 * All commands
 	 * 
 	 * @var array
@@ -155,7 +126,7 @@ class BladeParser {
 
 		if ($marker === '@@') 
 		{
-			return static::T_END_COMMAND;
+			return Constant::T_COMMAND_TYPE_BLOCK_END;
 		}
 		else if ($marker == '@' && $keyword = array_get($this->keywords, $key))
 		{
@@ -165,15 +136,15 @@ class BladeParser {
 
 			if ($keyword['hasBody'])
 			{
-				return static::T_BLOCK_COMMAND;	
+				return Constant::T_COMMAND_TYPE_BLOCK_START;	
 			}
 			else
 			{
-				return static::T_LINE_COMMAND;	
+				return Constant::T_COMMAND_TYPE_LINE;	
 			}
 		}
 
-		return static::T_NON_COMMAND;
+		return Constant::T_COMMAND_TYPE_NONE;
 	}
 
 	/**
@@ -233,7 +204,7 @@ class BladeParser {
 	{
 		foreach($this->commands as $key => $command)
 		{
-			if ($command->getType() == static::T_END_COMMAND && is_null($command->getNumber()))
+			if ($command->getType() == Constant::T_COMMAND_TYPE_BLOCK_END && is_null($command->getNumber()))
 			{
 				return $key;
 			}
@@ -251,7 +222,7 @@ class BladeParser {
 	{
 		while($line >= 0)
 		{
-			if ($this->commands[$line]->getType() == static::T_BLOCK_COMMAND && is_null($this->commands[$line]->getNumber()))
+			if ($this->commands[$line]->getType() == Constant::T_COMMAND_TYPE_BLOCK_START && is_null($this->commands[$line]->getNumber()))
 			{
 				return $line;
 			}
@@ -275,7 +246,7 @@ class BladeParser {
 			 * All block commands should be numbered at this point, if they aren't
 			 * code has a syntax error.
 			 */
-			if ($command->getType() == static::T_BLOCK_COMMAND && is_null($command->getNumber()))
+			if ($command->getType() == Constant::T_COMMAND_TYPE_BLOCK_START && is_null($command->getNumber()))
 			{
 				throw new SyntaxError("One or more code blocks are not closed (@@).", 1);
 			}
@@ -304,7 +275,7 @@ class BladeParser {
 	{
 		foreach($this->commands as $key => $command)
 		{
-			if ($command->getType() == static::T_BLOCK_COMMAND || $command->getType() == static::T_LINE_COMMAND)
+			if ($command->getType() == Constant::T_COMMAND_TYPE_BLOCK_START || $command->getType() == Constant::T_COMMAND_TYPE_LINE)
 			{
 				break;
 			}

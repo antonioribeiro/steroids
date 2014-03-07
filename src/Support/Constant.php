@@ -43,4 +43,33 @@ class Constant {
 	 */
 	const T_VARIABLE_HTML_ATTRIBUTE  = 3; // const=1
 
+	/**
+	 * Line commands start with @ and have no block ending
+	 * 
+	 * 		@h1(this is a line command)
+	 * 		
+	 */
+	const T_COMMAND_TYPE_LINE = 1;
+
+	/**
+	 * Block commands start with @ and must end with @@
+	 *
+	 * 		@php
+	 * 			$var = 'this is a block command';
+	 * 		@@
+	 */
+	const T_COMMAND_TYPE_BLOCK_START = 2;
+
+	/**
+	 * The block ending marker: @@
+	 * 
+	 */
+	const T_COMMAND_TYPE_BLOCK_END = 3;
+
+	/** 
+	 * Everything which is not a command
+	 * 
+	 */
+	const T_COMMAND_TYPE_NONE = 4;
+
 }
