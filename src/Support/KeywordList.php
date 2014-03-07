@@ -116,18 +116,19 @@ class KeywordList {
 	 */
 	private function addKeyword($file) 
 	{
-		$keyword = $this->makeKeyword($file);
-
-		if ($keyword && ! $this->isInDefaultDir($file))
+		if ($keyword = $this->makeKeyword($file))
 		{
-			$tree = explodeTree(array($file->getRelativePath() => $keyword), slash());
-		}
-		else
-		{
-			$tree = array('default' => $keyword);
-		}
+			if (! $this->isInDefaultDir($file))
+			{
+				$tree = explodeTree(array($file->getRelativePath() => $keyword), slash());
+			}
+			else
+			{
+				$tree = array('default' => $keyword);
+			}
 
-		$this->keywords = array_merge_recursive($this->keywords, $tree);
+			$this->keywords = array_merge_recursive($this->keywords, $tree);
+		}
 	}
 
 	/**
