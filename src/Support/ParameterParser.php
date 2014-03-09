@@ -339,13 +339,20 @@ class ParameterParser {
 	 * 
 	 * @return [type] [description]
 	 */
-	public function getHtmlAttributesString() 
+	public function getHtmlAttributesString($exclusions = null)
 	{
+		$exclusions = (array) $exclusions ?: array();
+
 		$attributes = array();
 
 		foreach($this->getParameters() as $key => $values)
 		{
-			if($values['type'] == Constant::T_VARIABLE_HTML_ATTRIBUTE)
+			// Must be an HTML constant
+			// Parameter name (@_title) must not be in the exclusions array
+			// Parameter number (@_1) must not be in the exclusions array
+			if($values['type'] == Constant::T_VARIABLE_HTML_ATTRIBUTE
+				&& ! in_array($values['name'], $exclusions)
+				&& ! in_array($key+1, $exclusions))
 			{
 				$attributes[$values['name']] = $this->getAttribute($values['name']);
 			}

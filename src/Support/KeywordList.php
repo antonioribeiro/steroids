@@ -71,7 +71,7 @@ class KeywordList {
 	}
 
 	/**
-	 * Load all keywords from disk
+	 * Loads a new set of keywords from disk
 	 * 
 	 * @return void
 	 */

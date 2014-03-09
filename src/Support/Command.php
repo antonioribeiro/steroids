@@ -434,7 +434,7 @@ class Command {
 
 		if ($name == 'ATTRIBUTES')
 		{
-			return $this->parameters->getHtmlAttributesString();
+			return $this->parameters->getHtmlAttributesString($this->getExclusions());
 		}
 
 		if ($name == 'PARAMETERS')
@@ -455,4 +455,13 @@ class Command {
 		return $this->parameters->getAttribute($name, $function);
 	}
 
+	/**
+	 * Get a list of items that should be excluded from HTML attribute strings.
+	 *
+	 * @return array
+	 */
+	private function getExclusions()
+	{
+		return array_column($this->instruction['variables'], 'name');
+	}
 }
