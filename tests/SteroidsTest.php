@@ -128,8 +128,8 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 	public function testPatternSecBlockWithNoBodyAndBigNumber()
 	{
 		$this->equals(
-						"<section class=\"col col-10000\">\n\t\n</section>",
-						$this->steroids->inject("@sec(10000)@@")
+						"<section class=\"col col-88888888\">\n\t\n</section>",
+						$this->steroids->inject("@sec(88888888)@@")
 					);
 	}
 
@@ -262,14 +262,6 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 					);
 	}
 
-	public function testPatternTextWithResendingParameters()
-	{
-		$this->equals(
-						"@if(true)\n\t<!--DEFAULT-->\n@if (true) \n\t<label class=\"label\">false</label>\n@endif\n<input type=\"text\" text name=\"first_name\" class=\"form-input\" />\n@else\n\t<!--DEFAULT-->\n@if (true) \n\t<label class=\"label\">false</label>\n@endif\n<input type=\"text\" text class=\"form-input\" />\n@endif",
-						$this->steroids->inject("@text(#name=first_name,class=form-input)")
-					);
-	}
-
     /**
      * @expectedException PragmaRX\Steroids\Exceptions\SyntaxError
      */	
@@ -365,6 +357,19 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 
 		// input keyword must be a string
 		$this->assertTrue(is_string($keywords['default']['input']['keyword']));
+	}
+
+	public function testPatternTextWithResendingParameters()
+	{
+		$this->equals(
+						"<!--DEFAULT-->\n@if (true) \n\t<label class=\"label\">Nome</label>\n@endif\n<input type=\"text\" class=\"form-input\" />",
+						$this->steroids->inject("@text(#label=Nome,#name=first_name,class=form-input)")
+					);
+
+		$this->equals(
+						"<!--DEFAULT-->\n@if (true) \n\t<label class=\"label\">Logradouro</label>\n@endif\n<input type=\"text\" title=\"Logradouro\" placeholder=\"Logradouro (Rua, Av., Travessa...)\" class=\"form-control\" name=\"address_street\" id=\"address_street\" />",
+						$this->steroids->inject('@text(#label=title=Logradouro,placeholder="Logradouro (Rua, Av., Travessa...)",class=form-control,#icon=user,name=id=address_street)')
+					);
 	}
 
 }
