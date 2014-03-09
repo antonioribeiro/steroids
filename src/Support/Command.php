@@ -462,6 +462,6 @@ class Command {
 	 */
 	private function getExclusions()
 	{
-		return array_column($this->instruction['variables'], 'name');
+		return array_pluck($this->instruction['variables'], 'name');
 	}
 }
