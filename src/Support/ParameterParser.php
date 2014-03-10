@@ -467,7 +467,7 @@ class ParameterParser {
 		else
 		if ($function == 'has')
 		{
-			return count($values) ? 'true' : 'false';
+			return ! empty($values) && count($values) ? 'true' : 'false';
 		}
 
 		return 'false';
