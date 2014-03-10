@@ -1,0 +1,1 @@
+<button type="submit" class="btn btn-{{ @_color->has ? '@_color' : 'primary' }}">@_1</button>
