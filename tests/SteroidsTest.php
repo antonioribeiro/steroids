@@ -372,7 +372,17 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 					);
 	}
 
+	public function testVariableHasAndValueAreCorrectlySetGet()
+	{
+		$this->equals(
+			"<button type=\"submit\" class=\"btn btn-{{ true ? 'danger' : 'primary' }}\">Danger</button>",
+			$this->steroids->inject('@submit(Danger, #color=danger)')
+		);
+	}
+
 }
+
+// ------------- helpers
 
 function AsciiToInt($char){
 	$success = "";
