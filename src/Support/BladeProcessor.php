@@ -23,7 +23,7 @@ namespace PragmaRX\Steroids\Support;
 
 use PragmaRX\Support\Config;
 use PragmaRX\Support\Filesystem;
-use PragmaRX\Steroids\Support\VariableParser;
+use PragmaRX\Steroids\Support\TemplateVariableParser;
 
 use Exception;
 
@@ -57,7 +57,7 @@ class BladeProcessor {
 		
 		$template = $instruction['template'];
 
-		$variableParser = new VariableParser($template);
+		$variableParser = new TemplateVariableParser($template);
 
 		while($variable = $variableParser->first($template))
 		{
