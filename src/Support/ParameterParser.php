@@ -141,10 +141,11 @@ class ParameterParser {
 	/**
 	 * Check if the parameter is one or multiple assignments
 	 *
-	 * 		@d(#label=name=Name)
-	 * 		
-	 * @param  string
-	 * @param  $parameter
+	 * @d(#label=name=Name)
+	 *
+	 * @param  string $string
+	 * @param $parts
+	 * @internal param $parameter $parts
 	 * @return boolean
 	 */
 	private function checkParameterIsAssignment($string, &$parts) 
@@ -164,7 +165,8 @@ class ParameterParser {
 
 		foreach(range(0, count($matches[0])-2) as $i)
 		{
-			preg_match("/(?<type>[(\$#])?(?<name>.*)/", substr($string, $pos, $matches[0][$i][1]-$pos), $name);
+			// Trim spaces here because spaces might be relevant in any other places, but not here
+			preg_match("/(?<type>[\$#])?(?<name>.*)/", trim(substr($string, $pos, $matches[0][$i][1]-$pos)), $name);
 
 			$pos = $matches[0][$i][1]+1;
 
@@ -175,6 +177,7 @@ class ParameterParser {
 														'value' => $value
 													)
 												);
+
 		}
 
 		return true;
@@ -183,10 +186,12 @@ class ParameterParser {
 	/**
 	 * Check if the parameter is a single string
 	 *
-	 * 		@d(this is a single string)
-	 * 		
-	 * @param  string
-	 * @param  $parameter
+	 *   @d(this is a single string)
+	 *
+	 * @param $string
+	 * @param $parts
+	 * @internal param $string
+	 * @internal param $parameter
 	 * @return boolean
 	 */
 	private function checkParameterIsSingleString($string, &$parts)
@@ -232,12 +237,13 @@ class ParameterParser {
 
 	/**
 	 * Checks if the parameter is a is a one word HTML attribute, like "disabled":
-	 * 
-	 * 		<div disabled></div>
-	 * 		
-	 * @param  [type] $string [description]
-	 * @param  [type] $parts  [description]
-	 * @return [type]         [description]
+	 *
+	 *        <div disabled></div>
+	 *
+	 * @param $string
+	 * @param $parts
+	 * @internal param $parts
+	 * @return bool
 	 */
 	private function checkParameterIsAnyOtherType($string, &$parts) 
 	{
@@ -255,8 +261,9 @@ class ParameterParser {
 
 	/**
 	 * Set a parameter type.
-	 * 
+	 *
 	 * @param array $parameter
+	 * @return array
 	 */
 	private function setParameterType($parameter) 
 	{
@@ -336,8 +343,9 @@ class ParameterParser {
 
 	/**
 	 * Get the string of HTML attributes.
-	 * 
-	 * @return [type] [description]
+	 *
+	 * @param null $exclusions
+	 * @return string
 	 */
 	public function getHtmlAttributesString($exclusions = null)
 	{
@@ -399,9 +407,10 @@ class ParameterParser {
 
 	/**
 	 * Get a single attribute string.
-	 * 
-	 * @param  string $name     
-	 * @param  string $function 
+	 *
+	 * @param string $name
+	 * @param string $function
+	 * @param string $type
 	 * @return string
 	 */
 	public function getAttribute($name, $function = 'plain', $type = null)
