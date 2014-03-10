@@ -1,0 +1,1 @@
+<button {{@_type->has ? 'type="@_type"' : ''}} class="btn btn-{{ @_color->has ? '@_color' : 'primary' }}">@_1</button>

@@ -1,1 +1,1 @@
-<button type="submit" class="btn btn-{{ @_color->has ? '@_color' : 'primary' }}">@_1</button>
+@button(@_1, #type=submit, #color=@_color->bare)

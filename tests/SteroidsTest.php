@@ -375,8 +375,13 @@ class SteroidsTest extends PHPUnit_Framework_TestCase {
 	public function testVariableHasAndValueAreCorrectlySetGet()
 	{
 		$this->equals(
-			"<button type=\"submit\" class=\"btn btn-{{ true ? 'danger' : 'primary' }}\">Danger</button>",
+			"<button {{true ? 'type=\"submit\"' : ''}} class=\"btn btn-{{ true ? 'danger' : 'primary' }}\">Danger</button>",
 			$this->steroids->inject('@submit(Danger, #color=danger)')
+		);
+
+		$this->equals(
+			"<button {{true ? 'type=\"submit\"' : ''}} class=\"btn btn-{{ false ? '' : 'primary' }}\">Danger</button>",
+			$this->steroids->inject('@submit(Danger)')
 		);
 	}
 
