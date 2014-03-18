@@ -67,9 +67,12 @@ class ParameterParser {
 	 * 
 	 * @param string $parameters
 	 */
-	public function __construct($parameters) 
+	public function __construct($parameters = null)
 	{
-		$this->parse($parameters);
+		if ($parameters)
+		{
+			$this->parse($parameters);
+		}
 	}
 
 	/**

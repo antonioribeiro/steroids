@@ -58,8 +58,10 @@ class KeywordList {
 
 	/**
 	 * Initialize Steroids object
-	 * 
-	 * @param Locale $locale
+	 *
+	 * @param \PragmaRX\Support\Config $config
+	 * @param \PragmaRX\Support\Filesystem $fileSystem
+	 * @internal param \PragmaRX\Steroids\Support\Locale $locale
 	 */
 	public function __construct(Config $config, Filesystem $fileSystem)
 	{
@@ -96,9 +98,21 @@ class KeywordList {
 	}
 
 	/**
+	 * Retrieve a keyword by its name.
+	 *
+	 * @param $key
+	 * @return mixed
+	 */
+	public function get($key)
+	{
+		return array_get($this->keywords, $key);
+	}
+
+	/**
 	 * Get the list of keywords files and directories.
-	 * 	
+	 *
 	 * @param  string $dir
+	 * @throws \PragmaRX\Steroids\Exceptions\TemplatesDirectoryNotAvailable
 	 * @return array
 	 */
 	private function getFiles($dir) 

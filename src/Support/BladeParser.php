@@ -50,13 +50,20 @@ class BladeParser {
 	private $input;
 
 	/**
+	 * All end commands are stored here to speed up the process.
+	 *
+	 * @var
+	 */
+	private $commandsTypes = array();
+
+	/**
 	 * Set the keyword list
 	 * 
-	 * @param array $keywords
+	 * @param KeywordList $keywordList
 	 */
-	public function setKeywords($keywords)
+	public function setKeywords(KeywordList $keywordList)
 	{
-		$this->keywords = $keywords;
+		$this->keywordList = $keywordList;
 	}
 
 	/**
@@ -74,6 +81,8 @@ class BladeParser {
 		$this->numberAll();
 
 		$this->syntaxCheck();
+
+		return $this;
 	}
 
 	/**
@@ -94,20 +103,23 @@ class BladeParser {
 								PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE
 							);
 
-		foreach ($matches as $key => $match) {
+		foreach ($matches as $key => $match)
+		{
 			$command = new Command($match[0]);
 
 			$type = $this->getCommandAndType($match[0], $command);
 
-			$command->setType($type);
+			$command->type = $type;
 
-			$command->setStart($match[1]);
+			$command->start = $match[1];
 
-			$command->setEnd(isset($matches[$key+1][1]) ? $matches[$key+1][1] : strlen($this->input));
+			$command->end = isset($matches[$key+1][1]) ? $matches[$key+1][1] : strlen($this->input);
 
-			$command->setNumber(NULL);
+			$command->number = NULL;
 
 			$this->commands[] = $command;
+
+			$this->commandsTypes[$key] = $command->type;
 		}
 	}
 
@@ -118,19 +130,17 @@ class BladeParser {
 	 * @param  Command $command 
 	 * @return integer Command type
 	 */
-	protected function getCommandAndType($value, Command &$command)
+	protected function getCommandAndType($value, Command $command)
 	{
-		$key = $command->getFullInstruction();
+		$key = $command->template . '.' . $command->instruction;
 
-		$marker = $command->getMarker();
-
-		if ($marker === '@@') 
+		if ($command->marker === '@@')
 		{
 			return Constant::T_COMMAND_TYPE_BLOCK_END;
 		}
-		else if ($marker == '@' && $keyword = array_get($this->keywords, $key))
+		else if ($command->marker == '@' && $keyword = $this->keywordList->get($key))
 		{
-			$command->setInstruction($keyword);
+			$command->instruction = $keyword;
 
 			$this->commandCount++;
 
@@ -148,7 +158,7 @@ class BladeParser {
 	}
 
 	/**
-	 * Enumerate all block commands by searching all @ to the equivalent @@
+	 * Enumerate all commands
 	 * 
 	 * @return void 
 	 */
@@ -156,17 +166,29 @@ class BladeParser {
 	{
 		$number = 0;
 
+		// Enumerate Line commands
+		foreach($this->commands as $key => $command)
+		{
+			if ($command->type == Constant::T_COMMAND_TYPE_LINE)
+			{
+				$command->number = $number;
+
+				$number++;
+			}
+		}
+
+		// Enumerate block commands
 		while($end = $this->getFirstUnumeratedEndCommand())
 		{
 			$start = $this->getPriorUnumeratedBlockCommand($end);
 
-			$this->commands[$start]->setNumber($number);
+			$this->commands[$start]->number = $number;
 
-			$this->commands[$end]->setNumber($number);
+			$this->commands[$end]->number = $number;
 
-			$this->commands[$start]->setBody($this->getBody($start, $end));
+			$this->commands[$start]->body = $this->getBody($start, $end);
 
-			$this->commands[$start]->setEnd($this->commands[$end]->getStart() + strlen($this->commands[$end]->getLine()));
+			$this->commands[$start]->end = $this->commands[$end]->start + strlen($this->commands[$end]->line);
 
 			$number++;
 		}
@@ -187,9 +209,9 @@ class BladeParser {
 
 			$end = $this->commands[$end];
 
-			$s = $start->getStart() + strlen($start->getLine());
+			$s = $start->start + strlen($start->line);
 
-			$l = $end->getStart()-1-$s;
+			$l = $end->start-1-$s;
 
 			return substr($this->input, $s, $l);
 		}
@@ -202,28 +224,33 @@ class BladeParser {
 	 */
 	private function getFirstUnumeratedEndCommand()
 	{
-		foreach($this->commands as $key => $command)
+		foreach($this->commandsTypes as $key => $type)
 		{
-			if ($command->getType() == Constant::T_COMMAND_TYPE_BLOCK_END && is_null($command->getNumber()))
+			if ($type == Constant::T_COMMAND_TYPE_BLOCK_END)
 			{
+				$this->commandsTypes[$key] = 'processed';
+
 				return $key;
 			}
 		}
 	}
 
-	/** 
+	/**
 	 * Locate the first non numbered start of block (@). The difference between
 	 *  a block and a non block command is the $_BODY inside that command.
-	 * 
+	 *
 	 * @param  integer starting line
+	 * @throws \PragmaRX\Steroids\Exceptions\SyntaxError
 	 * @return integer
 	 */
 	private function getPriorUnumeratedBlockCommand($line)
 	{
 		while($line >= 0)
 		{
-			if ($this->commands[$line]->getType() == Constant::T_COMMAND_TYPE_BLOCK_START && is_null($this->commands[$line]->getNumber()))
+			if ($this->commandsTypes[$line] == Constant::T_COMMAND_TYPE_BLOCK_START)
 			{
+				$this->commandsTypes[$line] = 'processed';
+
 				return $line;
 			}
 
@@ -235,7 +262,8 @@ class BladeParser {
 
 	/**
 	 * Check if the blocks are well formed and throws an exceptions if it's not
-	 * 
+	 *
+	 * @throws \PragmaRX\Steroids\Exceptions\SyntaxError
 	 * @return void
 	 */
 	private function syntaxCheck() 
@@ -246,7 +274,7 @@ class BladeParser {
 			 * All block commands should be numbered at this point, if they aren't
 			 * code has a syntax error.
 			 */
-			if ($command->getType() == Constant::T_COMMAND_TYPE_BLOCK_START && is_null($command->getNumber()))
+			if ($command->type == Constant::T_COMMAND_TYPE_BLOCK_START && is_null($command->getNumber()))
 			{
 				throw new SyntaxError("One or more code blocks are not closed (@@).", 1);
 			}
@@ -254,34 +282,48 @@ class BladeParser {
 	}
 
 	/**
-	 * Parse and return true if commands were found
+	 * Get the number of commands found by the parser.
 	 * 
-	 * @param  string  $view 
-	 * @return boolean       
+	 * @return integer 
 	 */
-	public function hasCommands($view) 
+	public function getCommandCount()
 	{
-		$this->parse($view);
-
-		return $this->commandCount > 0;
+		return $this->commandCount;
 	}
- 
- 	/**
- 	 * Locate and return the fist Steroids command
- 	 * 
- 	 * @return Command
- 	 */
-	public function getFirstCommand() 
+
+	/**
+	 * Retrieves a command by its number.
+	 *
+	 * @param  integer $number
+	 * @return Command
+	 */
+	public function getCommandByNumber($number)
 	{
 		foreach($this->commands as $key => $command)
 		{
-			if ($command->getType() == Constant::T_COMMAND_TYPE_BLOCK_START || $command->getType() == Constant::T_COMMAND_TYPE_LINE)
+			if($command->getNumber() == $number)
 			{
-				break;
+				if ($command->type == Constant::T_COMMAND_TYPE_BLOCK_START || $command->type == Constant::T_COMMAND_TYPE_LINE)
+				{
+					break;
+				}
 			}
 		}
 
 		return $command;
+	}
+
+	/**
+	 * Retrieves the whole command text (view) by its number.
+	 * 
+	 * @param  integer $number 
+	 * @return string         
+	 */
+	public function getCommandTextByNumber($number)
+	{
+		$command = $this->getCommandByNumber($number);
+
+		return substr($this->input, $command->start, $command->getLength());
 	}
 
 }

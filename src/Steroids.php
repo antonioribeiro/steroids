@@ -58,9 +58,21 @@ class Steroids
 	private $parser;
 
 	/**
-	 * Initialize Steroids object
+	 * Blade Compiler Laravel is currently using to compile views
 	 * 
-	 * @param Locale $locale
+	 * @var 
+	 */
+	private $compiler;
+
+	/**
+	 * Initialize Steroids object
+	 *
+	 * @param \PragmaRX\Support\Config $config
+	 * @param \PragmaRX\Support\Filesystem $fileSystem
+	 * @param Support\KeywordList $keywordList
+	 * @param Support\BladeParser $parser
+	 * @param Support\BladeProcessor $processor
+	 * @internal param \PragmaRX\Steroids\Locale $locale
 	 */
 	public function __construct(Config $config, 
 								Filesystem $fileSystem, 
@@ -88,19 +100,9 @@ class Steroids
 	 */
 	public function inject($view, $compiler = null)
 	{
-		$this->parser->setKeywords($this->keywordList->all());
+		$this->setCompiler($compiler);
 
-		try 
-		{
-			while($this->parser->hasCommands($view))
-			{
-				$view = $this->processor->process($view, $this->parser->getFirstCommand());
-			}
-		} 
-		catch (\Exception $exception) 
-		{
-			return $this->treatException($exception, $compiler);
-		}
+		$view = $this->processView($view);
 
 		return $view;
 	}
@@ -108,9 +110,10 @@ class Steroids
 	/**
 	 * Exception handler. Will process a handled exception and, if a compiler is available
 	 * add the file name to the error message.
-	 * 
-	 * @param  Exception $exception 
-	 * @param  Compiler $compiler  
+	 *
+	 * @param  Exception $exception
+	 * @param  Compiler $compiler
+	 * @throws Exception
 	 * @return void
 	 */
 	private function treatException($exception, $compiler) 
@@ -158,4 +161,68 @@ class Steroids
 		$this->keywordList->setTemplatesDir($dir);
 	}
 
+	/**
+	 * Set the current compiler
+	 * 
+	 * @param BladeCompiler $compiler 
+	 */
+	private function setCompiler($compiler)
+	{
+		$this->compiler = $compiler;
+	}
+
+	/**
+	 * Get the current compiler
+	 * 
+	 * @return BladeCompiler
+	 */
+	private function getCompiler()
+	{
+		return $this->compiler;
+	}
+
+	/**
+	 * Recursivelly parses and process a view, finding commands and replacing them
+	 * by their respective values in files.
+	 * 
+	 * @param  string $view 
+	 * @return string       
+	 */
+	private function processView($view)
+	{
+		try
+		{
+			while(with($parser = $this->makeParserInstance($view))->getCommandCount() > 0)
+			{
+				$subview = $parser->getCommandCount() > 1
+							? $subview = $this->processView($parser->getCommandTextByNumber(0))
+							: null;
+
+				$command = $parser->getCommandByNumber(0);
+
+				$view = $this->processor->process($view, $command, $subview);
+			}
+		} 
+		catch (\Exception $exception) 
+		{
+			return $this->treatException($exception, $this->getCompiler());
+		}
+
+		return $view;
+	}
+
+	/**
+	 * Creates and configures a new instance of BladeParser.
+	 * 
+	 * @param  string $view 
+	 * @return BladeParser
+	 */
+	private function makeParserInstance($view)
+	{
+		$parser = new $this->parser;
+
+		$parser->setKeywords($this->keywordList);
+
+		return $parser->parse($view);
+	}
 }

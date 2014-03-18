@@ -30,18 +30,23 @@ use Exception;
 class BladeProcessor {
 
 	/**
-	 * Process the view by retrieving the template and replacing 
+	 * Process the view by retrieving the template and replacing
 	 * the command with the compiled result.
-	 * 
-	 * @param  string $view    
-	 * @param  Command $command 
-	 * @return string          
+	 *
+	 * @param string $view
+	 * @param Command $command
+	 * @param string $template
+	 * @return string
 	 */
-	public function process($view, $command)
+	public function process($view, $command, $template = null)
 	{
-		$template = $this->getTemplate($view, $command);
+		// If not template is sent from the caller, let's build our own here
+		if (! $template)
+		{
+			$template = $this->getTemplate($view, $command);
+		}
 
-		return substr_replace($view, $template, $command->getStart(), $command->getLength());
+		return substr_replace($view, $template, $command->start, $command->getLength());
 	}
 
 	/**
@@ -53,7 +58,7 @@ class BladeProcessor {
 	 */
 	private function getTemplate($view, $command)
 	{
-		$instruction = $command->getInstruction();
+		$instruction = $command->instruction;
 		
 		$template = $instruction['template'];
 

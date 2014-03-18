@@ -27,78 +27,96 @@ class Command {
 
 	/**
 	 * Command marker (@ or @@).
-	 * 
+	 *
+	 * Public with no getter to prioritize performance over design.
+	 *
 	 * @var string
 	 */
-	private $marker;
+	public $marker;
 
 	/**
 	 * Command line.
 	 * 
 	 * @var string
 	 */
-	private $line;
+	public $line;
 
 	/**
 	 * Instruction name. In the example @input, 'input' is the instruction.
+	 *
+	 * Public with no getter to prioritize performance over design.
 	 * 	
 	 * @var string
 	 */
-	private $instruction;
+	public $instruction;
 
 	/**
 	 * Template string.
-	 * 
+	 *
+	 * Public with no getter to prioritize performance over design.
+	 *
 	 * @var string
 	 */
-	private $template;
+	public $template;
 
 	/** 
 	 * Command body.
+	 *
+	 * Public with no getter to prioritize performance over design.
 	 *
 	 * 	@input
 	 * 	  This is the body
 	 * 	@@
 	 * @var [type]
 	 */
-	private $body;
+	public $body;
 
 	/**
 	 * Command body, the one sent in the same line of the command
+	 *
+	 * Public with no getter to prioritize performance over design.
 	 *
 	 * 	 @php $x = 'this is a body in the same line' @
 	 * 
 	 * @var string
 	 */
-	private $lineBody;
+	public $lineBody;
 
 	/**
 	 * Command type
-	 * 
+	 *
+	 * Public with no getter to prioritize performance over design.
+	 *
 	 * @var integer
 	 */
-	private $type;
+	public $type;
 
 	/**
 	 * Starting position of the command in the view
-	 * 
+	 *
+	 * Public with no getter to prioritize performance over design.
+	 *
 	 * @var integer
 	 */
-	private $start;
+	public $start;
 
 	/**
 	 * Ending position of the command in the view
-	 * 
+	 *
+	 * Public with no getter to prioritize performance over design.
+	 *
 	 * @var integer
 	 */
-	private $end;
+	public $end;
 
 	/**
 	 * Command block number. All blocks are numerated.
-	 * 
+	 *
+	 * Public with no getter to prioritize performance over design.
+	 *
 	 * @var integer
 	 */
-	private $number;
+	public $number;
 
 	/**
 	 * Class constructor.
@@ -133,29 +151,38 @@ class Command {
 	 */
 	private function parseCommandLine($command) 
 	{
-		preg_match('/(?<line>(?<marker>@{1,2})(?<name>[\w\.]*)(\(?(?<parameters>\w*[^(].*[^)]*)?\)\s*)?([.\s]*)?(?<body>.*))/', $command, $matches);
-
-		if (count($matches) > 1) 
+		if ( empty(trim($command)) || strpos($command, '@') === false )
 		{
-			$this->line = $matches['line'];
+			$this->line = $command;
 
-			$this->marker = $matches['marker'];
+			$this->parameters = new ParameterParser;
+		}
+		else
+		{
+			preg_match('/(?<line>(?<marker>@{1,2})(?<name>[\w\.]*)(\(?(?<parameters>\w*[^(].*[^)]*)?\)\s*)?([.\s]*)?(?<body>.*))/', $command, $matches);
 
-			list($this->instruction, $this->template) = $this->parseInstruction($matches['name']);
+			if (count($matches) > 1)
+			{
+				$this->line = $matches['line'];
 
-			$this->parameters = new ParameterParser($matches['parameters']);
+				$this->marker = $matches['marker'];
 
-			$this->setLineBody($matches['body']);
+				list($this->instruction, $this->template) = $this->parseInstruction($matches['name']);
+
+				$this->parameters = new ParameterParser($matches['parameters']);
+
+				$this->lineBody = $matches['body'];
+			}
 		}
 	}
 
 	/**
 	 * Parse the instruction name to separate the name from the folder:
-	 * 
-	 * 		bootstrap.input
-	 * 		
-	 * @param  [type] $string [description]
-	 * @return [type]         [description]
+	 *
+	 *    bootstrap.input
+	 *
+	 * @param  string $string
+	 * @return array
 	 */
 	private function parseInstruction($string) 
 	{
@@ -169,56 +196,6 @@ class Command {
 	}
 
 	/**
-	 * Retrieves the command line.
-	 * 
-	 * @return string
-	 */
-	public function getLine() 
-	{
-		return $this->line;
-	}
-
-	/**
-	 * Retrieves the command marker.
-	 * 	
-	 * @return string
-	 */
-	public function getMarker() 
-	{
-		return $this->marker;
-	}
-
-	/**
-	 * Retrieves the command instruction.
-	 * 	
-	 * @return string
-	 */
-	public function getInstruction() 
-	{
-		return $this->instruction;
-	}
-
-	/**
-	 * Retrieves the whole instruction.
-	 * 	
-	 * @return string
-	 */
-	public function getFullInstruction() 
-	{
-		return $this->getTemplate() . '.' . $this->instruction;
-	}
-
-	/**
-	 * Retrieves the template.
-	 * 	
-	 * @return string
-	 */
-	public function getTemplate() 
-	{
-		return $this->template;
-	}
-
-	/**
 	 * Retrieves the command body.
 	 * 	
 	 * @return string
@@ -227,58 +204,6 @@ class Command {
 	{
 		return $this->lineBody . $this->body;
 	}	
-
-	/**
-	 * Sets the command body.
-	 * 
-	 * @param string $body
-	 * @return  string
-	 */
-	public function setBody($body)
-	{
-		return $this->body = $body;
-	}
-
-	/**
-	 * Sets the command 'in the same line' body
-	 * 
-	 * @param string $body
-	 * @return string
-	 */
-	public function setLineBody($body) 
-	{
-		return $this->lineBody = $body;
-	}
-
-	/**
-	 * Set the command instruction.
-	 * 
-	 * @param string $instruction
-	 */
-	public function setInstruction($instruction) 
-	{
-		$this->instruction = $instruction;
-	}
-
-	/**
-	 * Retrieves the type of command.
-	 * 
-	 * @return string
-	 */
-	public function getType()
-	{
-		return $this->type;
-	}
-
-	/**
-	 * Retrieves the starting position of the command.
-	 * 
-	 * @return integer
-	 */
-	public function getStart()
-	{
-		return $this->start;
-	}
 
 	/**
 	 * Retrieves the length of the command.
@@ -301,55 +226,15 @@ class Command {
 	}
 
 	/**
-	 * Sets the command type.
-	 * 
-	 * @return void
-	 */
-	public function setType($type)
-	{
-		$this->type = $type;
-	}
-
-	/**
-	 * Sets the command starting position
-	 * 
-	 * @param integer $start 
-	 */
-	public function setStart($start)
-	{
-		$this->start = $start;
-	}
-
-	/**
-	 * Sets the command ending position.
-	 * 
-	 * @param integer $end 
-	 */
-	public function setEnd($end)
-	{
-		$this->end = $end;
-	}
-
-	/**
-	 * Sets the command number.
-	 * 
-	 * @param integer $number 
-	 */
-	public function setNumber($number)
-	{
-		$this->number = $number;
-	}
-
-	/**
 	 * Clear commands properties to prepare for a new parse.
 	 * 
 	 * @return string
 	 */
 	private function clear()
 	{
-		$this->setBody(null);
+		$this->body = null;
 
-		$this->setLineBody(null);
+		$this->lineBody = null;
 
 		$this->attributes = array();
 
@@ -365,7 +250,7 @@ class Command {
 	 */
 	public function setAllAttributesTypes()
 	{
-		if ($this->getLine())
+		if ($this->line)
 		{
 			foreach($this->parameters->getParameters() as $parameter)
 			{
