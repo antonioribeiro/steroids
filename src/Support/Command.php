@@ -151,7 +151,7 @@ class Command {
 	 */
 	private function parseCommandLine($command) 
 	{
-		if ( empty(trim($command)) || strpos($command, '@') === false )
+		if ( trim($command) == "" || strpos($command, '@') === false )
 		{
 			$this->line = $command;
 
