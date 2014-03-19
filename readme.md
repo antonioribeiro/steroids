@@ -330,7 +330,7 @@ Copy the templates examples to your app folder:
 
 ### License
 
-Steroids is licensed under the MIT License - see the `LICENSE` file for details
+Steroids is licensed under the BSD 3-Clause License - see the `LICENSE` file for details
 
 ### Contributing
 
