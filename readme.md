@@ -61,7 +61,7 @@ Would give you the following commands:
 
 ### Block commands
 
-Let's take the (silly, I know! :) `@php` (file `php.blade.php`) command as an example of block:
+Let's take the (silly, I know! :) `@php` (file `php.blade.php`) command as an example of a block:
 
     @php
         $title = 'subscribe';
@@ -73,7 +73,7 @@ Note that a block ends with `@@` and you can have as many nested blocks as you w
         @_BODY;
     ?>
 
-Is that simple, to create a block command you just have to add the `@_BODY` identifier in any part of your command.
+It's that simple, to create a block command you just have to add the `@_BODY` identifier in any part of your command.
 
 ### Extending commands
 
@@ -97,7 +97,7 @@ and `@password` commands:
 
 ### HTML Attributes, Local Variables and Positional Parameters
 
-You can dinamically create and send any number of paramenters to your commands:
+You can dynamically create and send any number of paramenters to your commands:
 
 #### HTML Attributes
 
@@ -211,9 +211,9 @@ If you need to access one of your HTML attributes you can use the `->bare` funct
 
     <input type="@_1" class="@_class->bare" />
 
-### Demimiters and Quotation marks
+### Delimiters and Quotation marks
 
-As delimiters of yours parameters you can use `,` or `;`:
+As delimiters of your parameters you can use `,` or `;`:
 
     @input(email,class=form-control,id=example,placeholder=Enter email)
 
