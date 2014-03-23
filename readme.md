@@ -97,7 +97,7 @@ and `@password` commands:
 
 ### HTML Attributes, Local Variables and Positional Parameters
 
-You can dynamically create and send any number of paramenters to your commands:
+You can dynamically create and send any number of parameters to your commands:
 
 #### HTML Attributes
 
