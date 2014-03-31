@@ -3,7 +3,7 @@
 
     "description": "Laravel 4 Blade on Steroids",
 
-    "keywords": ["steroids", "whitelist", "blacklist", "laravel"],
+    "keywords": ["laravel", "blade", "template", "view"],
 
     "license": "BSD-3-Clause",
 
