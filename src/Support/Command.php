@@ -252,7 +252,7 @@ class Command {
 	{
 		if ($this->line)
 		{
-			foreach($this->parameters->getParameters() as $parameter)
+			foreach ($this->parameters->getParameters() as $parameter)
 			{
 				if ($parameter['type'] == Constant::T_VARIABLE_HTML_ATTRIBUTE)
 				{

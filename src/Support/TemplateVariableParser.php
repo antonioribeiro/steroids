@@ -57,7 +57,7 @@ class TemplateVariableParser {
 
 		$this->variables = array();
 
-		foreach($matches[0] as $match)
+		foreach ($matches[0] as $match)
 		{
 			$text = $match[0];
 

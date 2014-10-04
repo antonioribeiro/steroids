@@ -81,7 +81,7 @@ class KeywordList {
 	{
 		$this->keywords = array();
 
-		foreach($this->getFiles($this->getTemplatesDir()) as $file)
+		foreach ($this->getFiles($this->getTemplatesDir()) as $file)
 		{
 			$this->addKeyword($file);
 		}

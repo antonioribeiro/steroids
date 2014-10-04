@@ -167,7 +167,7 @@ class BladeParser {
 		$number = 0;
 
 		// Enumerate Line commands
-		foreach($this->commands as $key => $command)
+		foreach ($this->commands as $key => $command)
 		{
 			if ($command->type == Constant::T_COMMAND_TYPE_LINE)
 			{
@@ -224,7 +224,7 @@ class BladeParser {
 	 */
 	private function getFirstUnumeratedEndCommand()
 	{
-		foreach($this->commandsTypes as $key => $type)
+		foreach ($this->commandsTypes as $key => $type)
 		{
 			if ($type == Constant::T_COMMAND_TYPE_BLOCK_END)
 			{
@@ -268,7 +268,7 @@ class BladeParser {
 	 */
 	private function syntaxCheck() 
 	{
-		foreach($this->commands as $key => $command)
+		foreach ($this->commands as $key => $command)
 		{
 			/**
 			 * All block commands should be numbered at this point, if they aren't
@@ -299,7 +299,7 @@ class BladeParser {
 	 */
 	public function getCommandByNumber($number)
 	{
-		foreach($this->commands as $key => $command)
+		foreach ($this->commands as $key => $command)
 		{
 			if($command->getNumber() == $number)
 			{

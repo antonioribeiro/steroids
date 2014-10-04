@@ -45,7 +45,7 @@ class Clear extends Base {
 	{
 		$count = 0;
 
-		foreach(File::files(App::make('path.storage').'/views') as $file) 
+		foreach (File::files(App::make('path.storage').'/views') as $file)
 		{
 			File::delete($file);
 			$count++;

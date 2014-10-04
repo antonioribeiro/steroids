@@ -92,7 +92,7 @@ class ParameterParser {
 		foreach ($parameters as $key => $value) {
 			$this->positionalParameters[] = $value;
 
-			foreach($this->parseParameter($value) as $parameter)
+			foreach ($this->parseParameter($value) as $parameter)
 			{
 				$this->parameters[] = $parameter;
 			}
@@ -115,7 +115,7 @@ class ParameterParser {
 
 		$start = 0;
 
-		foreach(range(0,count($matches[1])-1) as $i)
+		foreach (range(0,count($matches[1])-1) as $i)
 		{
 			$parameters[] = substr($string, $start, $matches[1][$i][1]-$start);
 
@@ -166,7 +166,7 @@ class ParameterParser {
 
 		$value = substr($string, $matches[0][count($matches[0])-2][1]+1);
 
-		foreach(range(0, count($matches[0])-2) as $i)
+		foreach (range(0, count($matches[0])-2) as $i)
 		{
 			// Trim spaces here because spaces might be relevant in any other places, but not here
 			preg_match("/(?<type>[\$#])?(?<name>.*)/", trim(substr($string, $pos, $matches[0][$i][1]-$pos)), $name);
@@ -356,7 +356,7 @@ class ParameterParser {
 
 		$attributes = array();
 
-		foreach($this->getParameters() as $key => $values)
+		foreach ($this->getParameters() as $key => $values)
 		{
 			// Must be an HTML constant
 			// Parameter name (@_title) must not be in the exclusions array
