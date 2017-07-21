@@ -104,7 +104,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */
     private function registerFileSystem()
     {
-        $this->app['steroids.fileSystem'] = $this->app->share(function($app)
+        $this->app->singleton('steroids.fileSystem', function($app)
         {
             return new Filesystem;
         });
@@ -117,7 +117,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */
     private function registerKeywordList()
     {
-        $this->app['steroids.keywordList'] = $this->app->share(function($app)
+        $this->app->singleton('steroids.keywordList', function($app)
         {
             return new KeywordList(
                                     $app['steroids.config'],
@@ -133,7 +133,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */
     private function registerBladeProcessor()
     {
-        $this->app['steroids.bladeProcessor'] = $this->app->share(function($app)
+        $this->app->singleton('steroids.bladeProcessor', function($app)
         {
             return new BladeProcessor($app['steroids.config']);
         });
@@ -146,7 +146,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */
     private function registerBladeParser()
     {
-        $this->app['steroids.bladeParser'] = $this->app->share(function($app)
+        $this->app->singleton('steroids.bladeParser', function($app)
         {
             return new BladeParser();
         });
@@ -160,7 +160,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */
     private function registerSteroids()
     {
-        $this->app['steroids'] = $this->app->share(function($app)
+        $this->app->singleton('steroids', function($app)
         {
             $app['steroids.loaded'] = true;
 
@@ -181,7 +181,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */ 
     private function registerTemplatesCommand()
     {
-        $this->app['steroids.templates.command'] = $this->app->share(function($app)
+        $this->app->singleton('steroids.templates.command', function($app)
         {
             return new TemplatesCommand();
         });
@@ -194,7 +194,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */ 
     private function registerClearCommand()
     {
-        $this->app['steroids.clear.command'] = $this->app->share(function($app)
+        $this->app->singleton('steroids.clear.command', function($app)
         {
             return new ClearCommand();
         });
@@ -207,7 +207,7 @@ class ServiceProvider extends PragmaRXServiceProvider {
      */ 
     private function registerReportCommand()
     {
-        $this->app['steroids.report.command'] = $this->app->share(function($app)
+        $this->app->singleton('steroids.report.command', function($app)
         {
             return new ReportCommand();
         });
